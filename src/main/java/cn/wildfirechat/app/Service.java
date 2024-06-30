@@ -12,7 +12,7 @@ public interface Service {
     RestResult sendLoginCode(String mobile);
     RestResult sendResetCode(String mobile);
     RestResult loginWithMobileCode(HttpServletResponse response, String mobile, String code, String clientId, int platform);
-    RestResult loginWithPassword(HttpServletResponse response, String mobile, String password, String clientId, int platform);
+    RestResult loginWithPassword(HttpServletResponse response, String name, String password, String clientId, int platform);
     RestResult changePassword(String oldPwd, String newPwd);
     RestResult resetPassword(String mobile, String resetCode, String newPwd);
     RestResult sendDestroyCode();

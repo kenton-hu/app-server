@@ -47,7 +47,7 @@ public class AppController {
 
     @PostMapping(value = "/login_pwd", produces = "application/json;charset=UTF-8")
     public Object loginWithPassword(@RequestBody UserPasswordLoginRequest request, HttpServletResponse response) {
-        return mService.loginWithPassword(response, request.getMobile(), request.getPassword(), request.getClientId(), request.getPlatform() == null ? 0 : request.getPlatform());
+        return mService.loginWithPassword(response, request.getUserName(), request.getPassword(), request.getClientId(), request.getPlatform() == null ? 0 : request.getPlatform());
     }
 
     @PostMapping(value = "/change_pwd", produces = "application/json;charset=UTF-8")

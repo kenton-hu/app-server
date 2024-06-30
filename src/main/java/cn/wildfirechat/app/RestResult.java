@@ -22,7 +22,9 @@ public class RestResult {
         ERROR_SESSION_CANCELED(18, "会话已经取消"),
         ERROR_PASSWORD_INCORRECT(19, "密码错误"),
         ERROR_FAILURE_TOO_MUCH_TIMES(20, "密码错误次数太多，请等5分钟再试试"),
-        ERROR_USER_FORBIDDEN(21, "用户被封禁");
+        ERROR_USER_FORBIDDEN(21, "用户被封禁"),
+        ERROR_USERNAME_NOT_EXIST(22, "用户名不存在"),
+        ERROR_USER_ID_NOT_NULL(23, "用户id不能为空");
         public int code;
         public String msg;
 

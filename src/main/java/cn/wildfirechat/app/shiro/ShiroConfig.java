@@ -33,6 +33,9 @@ public class ShiroConfig {
     @Autowired
     private UserPasswordRealm userPasswordRealm;
 
+    @Autowired
+    private UsernameRealm usernameRealm;
+
     @Value("${wfc.all_client_support_ssl}")
     private boolean All_Client_Support_SSL;
 
@@ -45,6 +48,8 @@ public class ShiroConfig {
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
 
         // <!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
+        filterChainDefinitionMap.put("/send_code", "anon");
+        filterChainDefinitionMap.put("/user/**", "anon");
         filterChainDefinitionMap.put("/send_code", "anon");
         filterChainDefinitionMap.put("/login", "anon");
         filterChainDefinitionMap.put("/pc_session", "anon");
@@ -82,7 +87,7 @@ public class ShiroConfig {
     @Bean
     public SecurityManager securityManager() {
         DefaultWebSecurityManager defaultSecurityManager = new DefaultWebSecurityManager();
-        defaultSecurityManager.setRealms(Arrays.asList(phoneCodeRealm, scanCodeRealm, userPasswordRealm));
+        defaultSecurityManager.setRealms(Arrays.asList(phoneCodeRealm, scanCodeRealm, userPasswordRealm, usernameRealm));
         ShiroSessionManager sessionManager = new ShiroSessionManager();
         sessionManager.setGlobalSessionTimeout(Long.MAX_VALUE);
         sessionManager.setSessionDAO(dbSessionDao);
