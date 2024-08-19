@@ -1,11 +1,12 @@
 package cn.wildfirechat.app.admin.result;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * admin 返回结果
  */
-public class Result<T> {
+public class Result<T> implements Serializable {
     /**
      * "{
      *  ""contentType"":null,

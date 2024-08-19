@@ -1,5 +1,6 @@
 package cn.wildfirechat.app.admin.service;
 
+import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 
 /**
@@ -11,5 +12,5 @@ public interface TUserService {
      * @param oldPwd 旧密码
      * @param newPwd 新密码
      */
-    Result<?> updatePwd(String oldPwd, String newPwd);
+    Result<?> updatePwd(UpdatePwdReqDTO reqDTO);
 }
