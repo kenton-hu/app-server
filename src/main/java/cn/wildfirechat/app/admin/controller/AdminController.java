@@ -3,6 +3,7 @@ package cn.wildfirechat.app.admin.controller;
 import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
+import cn.wildfirechat.app.admin.dto.req.UserInfoReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
 import org.simpleframework.xml.core.Validate;
@@ -20,6 +21,14 @@ public class AdminController {
 
     @Autowired
     private TUserService tUserService;
+
+    /**
+     * 获取用户信息
+     */
+    @PostMapping("/getUserInfo")
+    public Result<?> getUserInfo(@RequestBody UserInfoReqDTO reqDTO) {
+        return tUserService.getUserInfo(reqDTO);
+    }
 
     /**
      * 更新密码
