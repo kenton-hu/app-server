@@ -1,6 +1,7 @@
 package cn.wildfirechat.app.admin.service.impl;
 
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
@@ -41,5 +42,20 @@ public class TUserServiceImpl implements TUserService {
         tUser.setPasswordMD5(DigestUtil.md5Hex(reqDTO.getNewPwd()));
         tUserRepository.save(tUser);
         return new Result<>().success(null, null);
+    }
+
+    @Override
+    public Result<?> updateIcon(UpdateIconReqDTO reqDTO) {
+        LOG.info("reqDTO: {}", reqDTO);
+        Optional<TUser> optional = tUserRepository.findById(2);
+        if (!optional.isPresent()) {
+            // 用户不存在，返回错误信息
+            return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
+        }
+        TUser tUser = optional.get();
+        LOG.info("tuser: {}", tUser);
+        tUser.setPortrait(reqDTO.getIcon());
+        tUserRepository.save(tUser);
+        return new Result<>().success(tUser, null);
     }
 }
