@@ -3,6 +3,7 @@ package cn.wildfirechat.app.admin.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.wildfirechat.app.RestResult;
 import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserInfoRespDTO;
@@ -12,6 +13,14 @@ import cn.wildfirechat.app.wfchat.jpa.TUser;
 import cn.wildfirechat.app.wfchat.jpa.TUserRepository;
 import cn.wildfirechat.app.wfchat.jpa.TUserStatus;
 import cn.wildfirechat.app.wfchat.jpa.TUserStatusRepository;
+import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.Conversation;
+import cn.wildfirechat.pojos.MessagePayload;
+import cn.wildfirechat.pojos.SendMessageResult;
+import cn.wildfirechat.sdk.MessageAdmin;
+import cn.wildfirechat.sdk.model.IMResult;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +33,8 @@ import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static cn.wildfirechat.app.RestResult.RestCode.ERROR_SERVER_ERROR;
 
 @Service
 public class TUserServiceImpl implements TUserService {
@@ -134,5 +145,27 @@ public class TUserServiceImpl implements TUserService {
         pageRespDTO.setTotalCount(page.getTotalElements());
         // 查询用户状态
         return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> sendMessage(UserSendMsgReqDTO reqDTO) {
+        Subject subject = SecurityUtils.getSubject();
+        String userId = (String) subject.getSession().getAttribute("userId");
+
+        Conversation conversation = new Conversation();
+        conversation.setTarget(reqDTO.getTo());
+
+        MessagePayload payload = new MessagePayload();
+        payload.setContent(reqDTO.getContent());
+        IMResult<SendMessageResult> imResult = null;
+        try {
+            imResult = MessageAdmin.sendMessage(userId, conversation, payload);
+            if (imResult != null && imResult.getCode() == ErrorCode.ERROR_CODE_SUCCESS.code) {
+                return new Result<>().success(imResult.getResult(), reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Result<>().error(imResult.getErrorCode() + "", imResult.getMsg(), reqDTO.getSessionId());
     }
 }

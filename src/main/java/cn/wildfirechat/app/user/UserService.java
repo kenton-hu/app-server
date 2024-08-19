@@ -2,11 +2,8 @@ package cn.wildfirechat.app.service.user;
 
 
 import cn.wildfirechat.app.RestResult;
-import cn.wildfirechat.app.jpa.FavoriteItem;
-import cn.wildfirechat.app.pojo.*;
-import cn.wildfirechat.pojos.InputCreateDevice;
+import cn.wildfirechat.app.pojo.UserPasswordLoginRequest;
 import cn.wildfirechat.pojos.InputOutputUserInfo;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 

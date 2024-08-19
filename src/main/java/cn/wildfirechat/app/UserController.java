@@ -1,6 +1,10 @@
 package cn.wildfirechat.app;
 
 import cn.wildfirechat.app.admin.dto.req.UserListReqDTO;
+import cn.wildfirechat.app.admin.dto.req.UserSendMsgReqDTO;
+import cn.wildfirechat.app.admin.result.Result;
+import cn.wildfirechat.app.admin.service.TUserService;
+import cn.wildfirechat.app.pojo.SendMessageRequest;
 import cn.wildfirechat.app.pojo.UserPasswordLoginRequest;
 import cn.wildfirechat.app.service.user.UserService;
 import cn.wildfirechat.pojos.InputOutputUserInfo;
@@ -20,6 +24,8 @@ public class UserController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService userService;
+    @Autowired
+    private TUserService tUserService;
 
 
     @GetMapping()
@@ -48,9 +54,18 @@ public class UserController {
      */
     @CrossOrigin
     @PostMapping(value = "/list")
-    public Object userList(@Valid @RequestBody UserListReqDTO reqDTO) {
-        return userService.getUserList(10, (reqDTO.getPageNo() - 1) * 10);
+    public Result<?> userList(@Valid @RequestBody UserListReqDTO reqDTO) {
+        return tUserService.getUserList(reqDTO);
     }
+
+    /**
+     * 发送消息
+     */
+    @PostMapping(value = "/sendMsg")
+    public Object sendMessage(@RequestBody UserSendMsgReqDTO reqDTO) {
+        return tUserService.sendMessage(reqDTO);
+    }
+
     /**
      * 创建用户
      *

@@ -41,4 +41,11 @@ public interface TUserService {
      * @return
      */
     Result<?> getUserList(UserListReqDTO reqDTO);
+
+    /**
+     * 发送消息
+     * @param reqDTO
+     * @return
+     */
+    Result<?> sendMessage(UserSendMsgReqDTO reqDTO);
 }
