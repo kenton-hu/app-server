@@ -2,17 +2,16 @@ package cn.wildfirechat.app.admin.service.impl;
 
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
+import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
 import cn.wildfirechat.app.wfchat.jpa.TUser;
 import cn.wildfirechat.app.wfchat.jpa.TUserRepository;
-import com.qcloud.cos.utils.Md5Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ public class TUserServiceImpl implements TUserService {
         }
         tUser.setPasswordMD5(DigestUtil.md5Hex(reqDTO.getNewPwd()));
         tUserRepository.save(tUser);
-        return new Result<>().success(null, null);
+        return new Result<>().success(null, reqDTO.getSessionId());
     }
 
     @Override
@@ -56,6 +55,21 @@ public class TUserServiceImpl implements TUserService {
         LOG.info("tuser: {}", tUser);
         tUser.setPortrait(reqDTO.getIcon());
         tUserRepository.save(tUser);
-        return new Result<>().success(tUser, null);
+        return new Result<>().success(tUser, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> updatePhone(UpdatePhoneReqDTO reqDTO) {
+        LOG.info("reqDTO: {}", reqDTO);
+        Optional<TUser> optional = tUserRepository.findById(2);
+        if (!optional.isPresent()) {
+            // 用户不存在，返回错误信息
+            return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
+        }
+        TUser tUser = optional.get();
+        LOG.info("tuser: {}", tUser);
+        tUser.setMobile(reqDTO.getPhoneNumber());
+        tUserRepository.save(tUser);
+        return new Result<>().success(tUser, reqDTO.getSessionId());
     }
 }

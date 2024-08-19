@@ -1,6 +1,7 @@
 package cn.wildfirechat.app.admin.controller;
 
 import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
+import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
@@ -35,5 +36,13 @@ public class AdminController {
     @PostMapping("/updateIcon")
     public Result<?> updateIcon(@RequestBody UpdateIconReqDTO reqDTO) {
         return tUserService.updateIcon(reqDTO);
+    }
+
+    /**
+     * 更新密码
+     */
+    @PostMapping("/updatePhone")
+    public Result<?> updatePhone(@RequestBody UpdatePhoneReqDTO reqDTO) {
+        return tUserService.updatePhone(reqDTO);
     }
 }

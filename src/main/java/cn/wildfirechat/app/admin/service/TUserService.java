@@ -1,6 +1,7 @@
 package cn.wildfirechat.app.admin.service;
 
 import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
+import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 
@@ -21,4 +22,11 @@ public interface TUserService {
      * @return
      */
     Result<?> updateIcon(UpdateIconReqDTO reqDTO);
+
+    /**
+     * 修改手机号
+     * @param reqDTO
+     * @return
+     */
+    Result<?> updatePhone(UpdatePhoneReqDTO reqDTO);
 }
