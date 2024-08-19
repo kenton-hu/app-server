@@ -4,6 +4,7 @@ import cn.wildfirechat.app.jpa.PCSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,7 @@ import org.springframework.util.unit.DataSize;
 
 import javax.servlet.MultipartConfigElement;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ServletComponentScan
 @EnableScheduling
 public class Application {
