@@ -1,9 +1,6 @@
 package cn.wildfirechat.app.wfchat.jpa;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -63,6 +60,9 @@ public class TUser {
 
     @Column(name = "_deleted")
     private int deleted;
+
+    @Transient
+    private String userStatus;
 
 
     public int getId() {
@@ -207,5 +207,13 @@ public class TUser {
 
     public void setDeleted(int deleted) {
         this.deleted = deleted;
+    }
+
+    public String getUserStatus() {
+        return userStatus;
+    }
+
+    public void setUserStatus(String userStatus) {
+        this.userStatus = userStatus;
     }
 }

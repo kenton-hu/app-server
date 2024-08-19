@@ -1,5 +1,6 @@
 package cn.wildfirechat.app;
 
+import cn.wildfirechat.app.admin.dto.req.UserListReqDTO;
 import cn.wildfirechat.app.pojo.UserPasswordLoginRequest;
 import cn.wildfirechat.app.service.user.UserService;
 import cn.wildfirechat.pojos.InputOutputUserInfo;
@@ -10,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
@@ -39,6 +41,16 @@ public class UserController {
         return userService.getUserList(count, offset);
     }
 
+    /**
+     * 获取用户列表
+     * @param reqDTO  请求参数
+     * @return 用户列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/list")
+    public Object userList(@Valid @RequestBody UserListReqDTO reqDTO) {
+        return userService.getUserList(10, (reqDTO.getPageNo() - 1) * 10);
+    }
     /**
      * 创建用户
      *

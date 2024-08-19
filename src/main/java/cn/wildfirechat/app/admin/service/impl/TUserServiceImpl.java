@@ -1,11 +1,10 @@
 package cn.wildfirechat.app.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
-import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UserInfoReqDTO;
+import cn.wildfirechat.app.admin.dto.req.*;
+import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserInfoRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
@@ -16,8 +15,14 @@ import cn.wildfirechat.app.wfchat.jpa.TUserStatusRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -98,5 +103,36 @@ public class TUserServiceImpl implements TUserService {
         TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
         userInfoRespDTO.setUserStatus(tUserStatus);
         return new Result<UserInfoRespDTO>().success(userInfoRespDTO, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> getUserList(UserListReqDTO reqDTO) {
+        // 查询条件存在这个对象中
+        Specification<TUser> specification = (root, query, cb) -> {
+            List<Predicate> predicateList = new ArrayList<>();
+            if (StrUtil.isNotBlank(reqDTO.getSearchKey())) {
+                predicateList.add(cb.like(root.get("name").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                predicateList.add(cb.or(cb.like(root.get("displayName").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
+                predicateList.add(cb.or(cb.like(root.get("mobile").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
+            }
+            Predicate[] p = new Predicate[predicateList.size()];
+            return cb.and(predicateList.toArray(p));
+        };
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        Page<TUser> page = tUserRepository.findAll(specification, pageRequest);
+        PageRespDTO<TUser> pageRespDTO = new PageRespDTO<>();
+        for (TUser tUser : page.getContent()) {
+            TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
+            if (null != tUserStatus) {
+                tUser.setUserStatus(tUserStatus.getStatus());
+            }
+        }
+        pageRespDTO.setItems(page.getContent());
+        pageRespDTO.setPageNo(reqDTO.getPageNo());
+        pageRespDTO.setPageSize(reqDTO.getPageSize());
+        pageRespDTO.setTotalPage(page.getTotalPages());
+        pageRespDTO.setTotalCount(page.getTotalElements());
+        // 查询用户状态
+        return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
     }
 }
