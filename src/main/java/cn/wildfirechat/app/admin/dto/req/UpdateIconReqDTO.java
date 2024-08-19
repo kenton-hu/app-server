@@ -20,11 +20,11 @@ public class UpdateIconReqDTO implements Serializable {
         this.sessionId = sessionId;
     }
 
-    public @NotBlank(message = "头像url不能为空") String getIcon() {
+    public String getIcon() {
         return icon;
     }
 
-    public void setIcon(@NotBlank(message = "头像url不能为空") String icon) {
+    public void setIcon(@NotBlank(message = "头像url不能为空")String icon) {
         this.icon = icon;
     }
 
