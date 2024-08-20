@@ -1,5 +1,6 @@
 package cn.wildfirechat.app.admin.service;
 
+import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 
@@ -14,4 +15,11 @@ public interface TGroupService {
      * @return
      */
     Result<?> getGroupList(GroupListReqDTO reqDTO);
+
+    /**
+     * 创建群组
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> createGroup(AddGroupReqDTO reqDTO);
 }

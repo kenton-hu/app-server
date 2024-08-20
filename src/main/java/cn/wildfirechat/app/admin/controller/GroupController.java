@@ -1,5 +1,7 @@
 package cn.wildfirechat.app.admin.controller;
 
+import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
+import cn.wildfirechat.app.admin.dto.req.AddUserReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UserListReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
@@ -22,6 +24,7 @@ public class GroupController {
 
     @Autowired
     private TGroupService tGroupService;
+
     /**
      * 获取群组列表
      * @param reqDTO  请求参数
@@ -31,5 +34,16 @@ public class GroupController {
     @PostMapping(value = "/list")
     public Result<?> userList(@Valid @RequestBody GroupListReqDTO reqDTO) {
         return tGroupService.getGroupList(reqDTO);
+    }
+
+    /**
+     * 创建群组
+     *
+     * @param reqDTO 用户信息
+     * @return
+     */
+    @PostMapping(value = "/create")
+    public Result<?> createUser(@RequestBody AddGroupReqDTO reqDTO) {
+        return tGroupService.createGroup(reqDTO);
     }
 }
