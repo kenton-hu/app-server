@@ -6,6 +6,7 @@ import cn.hutool.crypto.digest.DigestUtil;
 import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserInfoRespDTO;
+import cn.wildfirechat.app.admin.dto.resp.UserRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
 import cn.wildfirechat.app.wfchat.jpa.TUser;
@@ -13,10 +14,9 @@ import cn.wildfirechat.app.wfchat.jpa.TUserRepository;
 import cn.wildfirechat.app.wfchat.jpa.TUserStatus;
 import cn.wildfirechat.app.wfchat.jpa.TUserStatusRepository;
 import cn.wildfirechat.common.ErrorCode;
-import cn.wildfirechat.pojos.Conversation;
-import cn.wildfirechat.pojos.MessagePayload;
-import cn.wildfirechat.pojos.SendMessageResult;
+import cn.wildfirechat.pojos.*;
 import cn.wildfirechat.sdk.MessageAdmin;
+import cn.wildfirechat.sdk.UserAdmin;
 import cn.wildfirechat.sdk.model.IMResult;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -192,5 +192,40 @@ public class TUserServiceImpl implements TUserService {
         TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
         userInfoRespDTO.setUserStatus(tUserStatus);
         return new Result<>().success(tUser, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> createUser(AddUserReqDTO reqDTO) {
+        InputOutputUserInfo inputOutputUserInfo = new InputOutputUserInfo();
+        BeanUtil.copyProperties(reqDTO, inputOutputUserInfo);
+        IMResult<OutputCreateUser> imResult = null;
+        IMResult<Void> voidIMResult = null;
+        String code = "";
+        String msg = "";
+        try {
+            if (StrUtil.isNotBlank(reqDTO.getUserId())) {
+                // 修改
+                voidIMResult = UserAdmin.updateUserInfo(inputOutputUserInfo, 1);
+                if (voidIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                    // 返回data
+                    return new Result<>().success(new UserRespDTO(reqDTO.getName(), reqDTO.getUserId()), reqDTO.getSessionId());
+                }
+                code = String.valueOf(voidIMResult.getCode());
+                msg = voidIMResult.getMsg();
+            } else {
+                // 添加
+                imResult = UserAdmin.createUser(inputOutputUserInfo);
+                if (imResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                    OutputCreateUser createUser = imResult.getResult();
+                    // 返回data
+                    return new Result<>().success(new UserRespDTO(createUser.getName(), createUser.getUserId()), reqDTO.getSessionId());
+                }
+                code = String.valueOf(imResult.getCode());
+                msg = imResult.getMsg();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(code, msg, reqDTO.getSessionId());
     }
 }

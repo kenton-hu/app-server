@@ -55,4 +55,11 @@ public interface TUserService {
      * @return
      */
     Result<?> login(LoginReqDTO reqDTO);
+
+    /**
+     * 创建用户
+     * @param reqDTO
+     * @return
+     */
+    Result<?> createUser(AddUserReqDTO reqDTO);
 }

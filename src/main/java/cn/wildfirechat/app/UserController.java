@@ -1,5 +1,6 @@
 package cn.wildfirechat.app;
 
+import cn.wildfirechat.app.admin.dto.req.AddUserReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UserListReqDTO;
 import cn.wildfirechat.app.admin.dto.req.UserSendMsgReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
@@ -66,15 +67,26 @@ public class UserController {
         return tUserService.sendMessage(reqDTO);
     }
 
+//    /**
+//     * 创建用户
+//     *
+//     * @param userInfo 用户信息
+//     * @return
+//     */
+//    @PostMapping(value = "/create", produces = "application/json;charset=UTF-8")
+//    public Object loginWithMobileCode(@RequestBody InputOutputUserInfo userInfo) {
+//        return userService.createUser(userInfo);
+//    }
+
     /**
      * 创建用户
      *
-     * @param userInfo 用户信息
+     * @param reqDTO 用户信息
      * @return
      */
     @PostMapping(value = "/create", produces = "application/json;charset=UTF-8")
-    public Object loginWithMobileCode(@RequestBody InputOutputUserInfo userInfo) {
-        return userService.createUser(userInfo);
+    public Result createUser(@RequestBody AddUserReqDTO reqDTO) {
+        return tUserService.createUser(reqDTO);
     }
 
 
