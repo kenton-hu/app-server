@@ -144,4 +144,37 @@ public class UserController {
     public Result<?> getBlockList(@Valid @RequestBody BlockUserListReqDTO reqDTO) {
         return tUserService.getBlockList(reqDTO);
     }
+
+    /**
+     * 获取敏感词列表
+     * @param reqDTO  请求参数
+     * @return 敏感词列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/getSensetive")
+    public Result<?> getSensetive(@Valid @RequestBody BasicReqDTO reqDTO) {
+        return tUserService.getSensetive(reqDTO);
+    }
+
+    /**
+     * 添加敏感词
+     * @param reqDTO  请求参数
+     * @return 结果
+     */
+    @CrossOrigin
+    @PostMapping(value = "/addSensetive")
+    public Result<?> addSensetive(@Valid @RequestBody SensetiveReqDTO reqDTO) {
+        return tUserService.addSensetive(reqDTO);
+    }
+
+    /**
+     * 删除敏感词
+     * @param reqDTO  请求参数
+     * @return 结果
+     */
+    @CrossOrigin
+    @PostMapping(value = "/delSensetive")
+    public Result<?> delSensetive(@Valid @RequestBody SensetiveReqDTO reqDTO) {
+        return tUserService.delSensetive(reqDTO);
+    }
 }

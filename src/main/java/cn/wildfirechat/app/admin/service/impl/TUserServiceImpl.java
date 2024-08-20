@@ -17,6 +17,7 @@ import cn.wildfirechat.app.wfchat.jpa.TUserStatusRepository;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.*;
 import cn.wildfirechat.sdk.MessageAdmin;
+import cn.wildfirechat.sdk.SensitiveAdmin;
 import cn.wildfirechat.sdk.UserAdmin;
 import cn.wildfirechat.sdk.model.IMResult;
 import org.apache.shiro.SecurityUtils;
@@ -255,7 +256,6 @@ public class TUserServiceImpl implements TUserService {
         LOG.info("destroyUser: {}", reqDTO);
         IMResult<Void> voidIMResult = null;
         try {
-            UserAdmin.getBlockedList();
             voidIMResult = UserAdmin.destroyUser(reqDTO.getUserId());
             if (voidIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
@@ -311,5 +311,50 @@ public class TUserServiceImpl implements TUserService {
         pageRespDTO.setTotalCount(page.getTotalElements());
         // 查询用户状态
         return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> getSensetive(BasicReqDTO reqDTO) {
+        IMResult<InputOutputSensitiveWords> sensitiveWordsIMResult = null;
+        try {
+            sensitiveWordsIMResult = SensitiveAdmin.getSensitives();
+            if (sensitiveWordsIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(sensitiveWordsIMResult.getResult(), reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(sensitiveWordsIMResult.getCode())
+                , sensitiveWordsIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> addSensetive(SensetiveReqDTO reqDTO) {
+        IMResult<Void> sensitiveWordsIMResult = null;
+        try {
+            sensitiveWordsIMResult = SensitiveAdmin.addSensitives(reqDTO.getWords());
+            if (sensitiveWordsIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(sensitiveWordsIMResult.getCode())
+                , sensitiveWordsIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> delSensetive(SensetiveReqDTO reqDTO) {
+        IMResult<Void> sensitiveWordsIMResult = null;
+        try {
+            sensitiveWordsIMResult = SensitiveAdmin.removeSensitives(reqDTO.getWords());
+            if (sensitiveWordsIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(sensitiveWordsIMResult.getCode())
+                , sensitiveWordsIMResult.getMsg(), reqDTO.getSessionId());
     }
 }

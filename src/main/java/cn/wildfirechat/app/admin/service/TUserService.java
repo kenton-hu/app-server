@@ -75,4 +75,25 @@ public interface TUserService {
     Result<?> destroyUser(DestroyUserReqDTO reqDTO);
 
     Result<?> getBlockList(@Valid BlockUserListReqDTO reqDTO);
+
+    /**
+     * 敏感词列表
+     * @param reqDTO 请求参数
+     * @return 敏感词列表
+     */
+    Result<?> getSensetive(@Valid BasicReqDTO reqDTO);
+
+    /**
+     * 添加敏感词
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> addSensetive(@Valid SensetiveReqDTO reqDTO);
+
+    /**
+     * 删除敏感词
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> delSensetive(@Valid SensetiveReqDTO reqDTO);
 }
