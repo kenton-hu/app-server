@@ -9,26 +9,25 @@ public class UserListReqDTO {
     @NotBlank(message = "sessionId不能为空")
     private String sessionId;
 
-    @NotBlank(message = "searchKey不能为空")
     private String searchKey;
 
     private int pageNo = 1;
 
     private int pageSize = 10;
 
-    public @NotBlank(message = "sessionId不能为空") String getSessionId() {
+    public String getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(@NotBlank(message = "sessionId不能为空") String sessionId) {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
-    public @NotBlank(message = "searchKey不能为空") String getSearchKey() {
+    public String getSearchKey() {
         return searchKey;
     }
 
-    public void setSearchKey(@NotBlank(message = "searchKey不能为空") String searchKey) {
+    public void setSearchKey(String searchKey) {
         this.searchKey = searchKey;
     }
 

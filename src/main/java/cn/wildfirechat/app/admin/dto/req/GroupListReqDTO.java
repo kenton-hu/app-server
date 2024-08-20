@@ -3,9 +3,9 @@ package cn.wildfirechat.app.admin.dto.req;
 import javax.validation.constraints.NotBlank;
 
 /**
- * 封禁用户列表请求DTO
+ * 群组列表请求DTO
  */
-public class BlockUserListReqDTO {
+public class GroupListReqDTO {
     @NotBlank(message = "sessionId不能为空")
     private String sessionId;
 
@@ -15,11 +15,11 @@ public class BlockUserListReqDTO {
 
     private int pageSize = 10;
 
-    public @NotBlank(message = "sessionId不能为空") String getSessionId() {
+    public String getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(@NotBlank(message = "sessionId不能为空") String sessionId) {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 

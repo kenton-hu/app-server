@@ -147,7 +147,6 @@ public class TUserServiceImpl implements TUserService {
         pageRespDTO.setPageSize(reqDTO.getPageSize());
         pageRespDTO.setTotalPage(page.getTotalPages());
         pageRespDTO.setTotalCount(page.getTotalElements());
-        // 查询用户状态
         return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
     }
 
