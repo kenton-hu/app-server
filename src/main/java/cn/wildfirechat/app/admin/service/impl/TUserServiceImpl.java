@@ -10,10 +10,7 @@ import cn.wildfirechat.app.admin.dto.resp.UserInfoRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
-import cn.wildfirechat.app.wfchat.jpa.TUser;
-import cn.wildfirechat.app.wfchat.jpa.TUserRepository;
-import cn.wildfirechat.app.wfchat.jpa.TUserStatus;
-import cn.wildfirechat.app.wfchat.jpa.TUserStatusRepository;
+import cn.wildfirechat.app.wfchat.jpa.*;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.*;
 import cn.wildfirechat.sdk.MessageAdmin;
@@ -49,6 +46,8 @@ public class TUserServiceImpl implements TUserService {
     private TUserRepository tUserRepository;
     @Autowired
     private TUserStatusRepository tUserStatusRepository;
+    @Autowired
+    private TSensitiveMessageRepository tSensitiveMessageRepository;
 
     @Override
     public Result<?> updatePwd(UpdatePwdReqDTO reqDTO) {
@@ -356,5 +355,18 @@ public class TUserServiceImpl implements TUserService {
         }
         return new Result<>().error(String.valueOf(sensitiveWordsIMResult.getCode())
                 , sensitiveWordsIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> sensitiveShot(BasicReqDTO reqDTO) {
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        Page<TSensitiveMessage> page = tSensitiveMessageRepository.findAll(pageRequest);
+        PageRespDTO<TSensitiveMessage> pageRespDTO = new PageRespDTO<>();
+        pageRespDTO.setItems(page.getContent());
+        pageRespDTO.setPageNo(reqDTO.getPageNo());
+        pageRespDTO.setPageSize(reqDTO.getPageSize());
+        pageRespDTO.setTotalPage(page.getTotalPages());
+        pageRespDTO.setTotalCount(page.getTotalElements());
+        return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
     }
 }

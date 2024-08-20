@@ -177,4 +177,15 @@ public class UserController {
     public Result<?> delSensetive(@Valid @RequestBody SensetiveReqDTO reqDTO) {
         return tUserService.delSensetive(reqDTO);
     }
+
+    /**
+     * 获取敏感词命中列表
+     * @param reqDTO  请求参数
+     * @return 敏感词列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/sensitiveShot")
+    public Result<?> sensitiveShot(@Valid @RequestBody BasicReqDTO reqDTO) {
+        return tUserService.sensitiveShot(reqDTO);
+    }
 }

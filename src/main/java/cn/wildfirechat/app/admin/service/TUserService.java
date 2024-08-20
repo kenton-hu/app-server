@@ -96,4 +96,11 @@ public interface TUserService {
      * @return
      */
     Result<?> delSensetive(@Valid SensetiveReqDTO reqDTO);
+
+    /**
+     * 敏感词命中列表
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> sensitiveShot(@Valid BasicReqDTO reqDTO);
 }
