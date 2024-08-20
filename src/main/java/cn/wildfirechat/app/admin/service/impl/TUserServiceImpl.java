@@ -3,7 +3,6 @@ package cn.wildfirechat.app.admin.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
-import cn.wildfirechat.app.RestResult;
 import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserInfoRespDTO;
@@ -24,17 +23,16 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static cn.wildfirechat.app.RestResult.RestCode.ERROR_SERVER_ERROR;
 
 @Service
 public class TUserServiceImpl implements TUserService {
@@ -167,5 +165,32 @@ public class TUserServiceImpl implements TUserService {
             e.printStackTrace();
         }
         return new Result<>().error(imResult.getErrorCode() + "", imResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> login(LoginReqDTO reqDTO) {
+        // 根据userName查询
+        TUser exampleUser = new TUser();
+        exampleUser.setName(reqDTO.getUserName());
+        Example<TUser> tUserExample = Example.of(exampleUser);
+        Optional<TUser> optional = tUserRepository.findOne(tUserExample);
+        if (!optional.isPresent()) {
+            return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
+        }
+        String password = DigestUtil.md5Hex(reqDTO.getPassword());
+        TUser tUser = optional.get();
+        LOG.info("tuser: {}", tUser);
+        // 验证密码是否正确
+        if (!password.equals(exampleUser.getPasswordMD5())) {
+            // 密码不正确，返回错误信息
+            return new Result<>().error("user:pwd:error", "密码错误", reqDTO.getSessionId());
+        }
+        UserInfoRespDTO userInfoRespDTO = new UserInfoRespDTO();
+        BeanUtil.copyProperties(tUser, userInfoRespDTO);
+        userInfoRespDTO.setSessionId(reqDTO.getSessionId());
+        // 查询用户状态
+        TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
+        userInfoRespDTO.setUserStatus(tUserStatus);
+        return new Result<>().success(tUser, reqDTO.getSessionId());
     }
 }

@@ -48,4 +48,11 @@ public interface TUserService {
      * @return
      */
     Result<?> sendMessage(UserSendMsgReqDTO reqDTO);
+
+    /**
+     * 登录
+     * @param reqDTO
+     * @return
+     */
+    Result<?> login(LoginReqDTO reqDTO);
 }

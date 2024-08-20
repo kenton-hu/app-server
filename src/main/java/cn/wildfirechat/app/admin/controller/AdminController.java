@@ -1,9 +1,6 @@
 package cn.wildfirechat.app.admin.controller;
 
-import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UserInfoReqDTO;
+import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
 import org.simpleframework.xml.core.Validate;
@@ -21,6 +18,16 @@ public class AdminController {
 
     @Autowired
     private TUserService tUserService;
+
+    /**
+     * 登录
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/login")
+    public Result<?> login(LoginReqDTO reqDTO) {
+        return tUserService.login(reqDTO);
+    }
 
     /**
      * 获取用户信息
