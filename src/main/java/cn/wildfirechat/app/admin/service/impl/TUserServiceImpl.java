@@ -369,4 +369,12 @@ public class TUserServiceImpl implements TUserService {
         pageRespDTO.setTotalCount(page.getTotalElements());
         return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
     }
+
+    @Override
+    public Result<?> delSensitiveShot(ClearSensitiveMessageReqDTO reqDTO) {
+        if (reqDTO.isClearFlag()) {
+            tSensitiveMessageRepository.deleteAll();
+        }
+        return new Result<>().success(null, reqDTO.getSessionId());
+    }
 }

@@ -103,4 +103,11 @@ public interface TUserService {
      * @return
      */
     Result<?> sensitiveShot(@Valid BasicReqDTO reqDTO);
+
+    /**
+     * 清空敏感词命中
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> delSensitiveShot(@Valid ClearSensitiveMessageReqDTO reqDTO);
 }
