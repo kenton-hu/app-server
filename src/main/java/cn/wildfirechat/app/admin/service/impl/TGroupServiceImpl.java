@@ -3,11 +3,13 @@ package cn.wildfirechat.app.admin.service.impl;
 import cn.hutool.core.util.StrUtil;
 import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
+import cn.wildfirechat.app.admin.dto.req.GroupUserListReqDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
-import cn.wildfirechat.app.admin.dto.resp.UserRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TGroupService;
 import cn.wildfirechat.app.wfchat.jpa.TGroup;
+import cn.wildfirechat.app.wfchat.jpa.TGroupMember;
+import cn.wildfirechat.app.wfchat.jpa.TGroupMemberRepository;
 import cn.wildfirechat.app.wfchat.jpa.TGroupRepository;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.OutputCreateGroupResult;
@@ -31,6 +33,8 @@ public class TGroupServiceImpl implements TGroupService {
     private static final Logger LOG = LoggerFactory.getLogger(TGroupServiceImpl.class);
     @Autowired
     private TGroupRepository tGroupRepository;
+    @Autowired
+    private TGroupMemberRepository tGroupMemberRepository;
 
     @Override
     public Result<?> getGroupList(GroupListReqDTO reqDTO) {
@@ -74,5 +78,28 @@ public class TGroupServiceImpl implements TGroupService {
             throw new RuntimeException(e);
         }
         return new Result<>().error(String.valueOf(groupImResult.getCode()), groupImResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> groupUsers(GroupUserListReqDTO reqDTO) {
+        LOG.info("groupUsers: {}", reqDTO);
+        // 查询条件存在这个对象中
+        Specification<TGroupMember> specification = (root, query, cb) -> {
+            List<Predicate> predicateList = new ArrayList<>();
+            if (StrUtil.isNotBlank(reqDTO.getSearchKey())) {
+                predicateList.add(cb.like(root.get("mid").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+            }
+            Predicate[] p = new Predicate[predicateList.size()];
+            return cb.and(predicateList.toArray(p));
+        };
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        Page<TGroupMember> page = tGroupMemberRepository.findAll(specification, pageRequest);
+        PageRespDTO<TGroupMember> pageRespDTO = new PageRespDTO<>();
+        pageRespDTO.setItems(page.getContent());
+        pageRespDTO.setPageNo(reqDTO.getPageNo());
+        pageRespDTO.setPageSize(reqDTO.getPageSize());
+        pageRespDTO.setTotalPage(page.getTotalPages());
+        pageRespDTO.setTotalCount(page.getTotalElements());
+        return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
     }
 }

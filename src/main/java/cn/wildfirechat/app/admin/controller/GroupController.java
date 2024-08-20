@@ -1,9 +1,6 @@
 package cn.wildfirechat.app.admin.controller;
 
-import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
-import cn.wildfirechat.app.admin.dto.req.AddUserReqDTO;
-import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UserListReqDTO;
+import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TGroupService;
 import org.simpleframework.xml.core.Validate;
@@ -45,5 +42,16 @@ public class GroupController {
     @PostMapping(value = "/create")
     public Result<?> createUser(@RequestBody AddGroupReqDTO reqDTO) {
         return tGroupService.createGroup(reqDTO);
+    }
+
+    /**
+     * 获取群成员
+     * @param reqDTO  请求参数
+     * @return 群成员列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/users")
+    public Result<?> groupUsers(@Valid @RequestBody GroupUserListReqDTO reqDTO) {
+        return tGroupService.groupUsers(reqDTO);
     }
 }
