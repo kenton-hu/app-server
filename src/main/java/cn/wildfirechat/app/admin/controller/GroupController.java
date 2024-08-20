@@ -109,4 +109,15 @@ public class GroupController {
     public Result<?> modifyGroupInfo(@RequestBody ModifyGroupReqDTO reqDTO) {
         return tGroupService.modifyGroupInfo(reqDTO);
     }
+
+    /**
+     * 解散群组
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/dismissGroup")
+    public Result<?> dismissGroup(@RequestBody DismissGroupReqDTO reqDTO) {
+        return tGroupService.dismissGroup(reqDTO);
+    }
 }

@@ -63,4 +63,11 @@ public interface TGroupService {
      * @return
      */
     Result<?> modifyGroupInfo(ModifyGroupReqDTO reqDTO);
+
+    /**
+     * 解散群组
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> dismissGroup(DismissGroupReqDTO reqDTO);
 }
