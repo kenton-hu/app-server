@@ -228,4 +228,19 @@ public class TUserServiceImpl implements TUserService {
         }
         return new Result<>().error(code, msg, reqDTO.getSessionId());
     }
+
+    @Override
+    public Result<?> updateUserStatus(BlockUserReqDTO reqDTO) {
+        LOG.info("updateUserStatus: {}", reqDTO);
+        IMResult<Void> voidIMResult = null;
+        try {
+            voidIMResult = UserAdmin.updateUserBlockStatus(reqDTO.getUserId(), reqDTO.getStatus());
+            if (voidIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(voidIMResult.getCode()), voidIMResult.getMsg(), reqDTO.getSessionId());
+    }
 }

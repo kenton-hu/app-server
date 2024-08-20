@@ -62,4 +62,6 @@ public interface TUserService {
      * @return
      */
     Result<?> createUser(AddUserReqDTO reqDTO);
+
+    Result<?> updateUserStatus(BlockUserReqDTO reqDTO);
 }
