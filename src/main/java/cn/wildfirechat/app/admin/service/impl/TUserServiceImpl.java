@@ -28,10 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.Id;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -375,5 +372,19 @@ public class TUserServiceImpl implements TUserService {
             tSensitiveMessageRepository.deleteAll();
         }
         return new Result<>().success(null, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> alls(BasicReqDTO reqDTO) {
+        IMResult<OutputGetUserList> allUsersIMResult = new IMResult<>();
+        try {
+            allUsersIMResult = UserAdmin.getAllUsers(Integer.MAX_VALUE, 0);
+            if (allUsersIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(allUsersIMResult.getResult(), reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(allUsersIMResult.getCode()), allUsersIMResult.getMsg(), reqDTO.getSessionId());
     }
 }

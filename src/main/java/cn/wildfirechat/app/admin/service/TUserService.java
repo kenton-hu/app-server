@@ -110,4 +110,11 @@ public interface TUserService {
      * @return
      */
     Result<?> delSensitiveShot(@Valid ClearSensitiveMessageReqDTO reqDTO);
+
+    /**
+     * 获取所有用户
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> alls(@Valid BasicReqDTO reqDTO);
 }

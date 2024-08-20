@@ -199,4 +199,15 @@ public class UserController {
     public Result<?> delSensitiveShot(@Valid @RequestBody ClearSensitiveMessageReqDTO reqDTO) {
         return tUserService.delSensitiveShot(reqDTO);
     }
+
+    /**
+     * 获取敏感词列表
+     * @param reqDTO  请求参数
+     * @return 敏感词列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/alls")
+    public Result<?> alls(@Valid @RequestBody BasicReqDTO reqDTO) {
+        return tUserService.alls(reqDTO);
+    }
 }
