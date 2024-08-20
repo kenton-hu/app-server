@@ -1,9 +1,6 @@
 package cn.wildfirechat.app;
 
-import cn.wildfirechat.app.admin.dto.req.AddUserReqDTO;
-import cn.wildfirechat.app.admin.dto.req.BlockUserReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UserListReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UserSendMsgReqDTO;
+import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TUserService;
 import cn.wildfirechat.app.pojo.SendMessageRequest;
@@ -124,5 +121,16 @@ public class UserController {
     @PostMapping(value = "/updateUserStatus")
     public Result<?> updateUserStatus(@RequestBody BlockUserReqDTO reqDTO) {
         return tUserService.updateUserStatus(reqDTO);
+    }
+
+    /**
+     * 销毁用户
+     * @param reqDTO 用户信息
+     * @return
+     */
+    @CrossOrigin
+    @PostMapping(value = "/destroyUser")
+    public Result<?> destroyUser(@RequestBody DestroyUserReqDTO reqDTO) {
+        return tUserService.destroyUser(reqDTO);
     }
 }

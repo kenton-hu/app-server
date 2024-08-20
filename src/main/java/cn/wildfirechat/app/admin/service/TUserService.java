@@ -64,4 +64,11 @@ public interface TUserService {
     Result<?> createUser(AddUserReqDTO reqDTO);
 
     Result<?> updateUserStatus(BlockUserReqDTO reqDTO);
+
+    /**
+     * 销毁用户
+     * @param reqDTO 用户信息
+     * @return
+     */
+    Result<?> destroyUser(DestroyUserReqDTO reqDTO);
 }

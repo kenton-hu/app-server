@@ -243,4 +243,19 @@ public class TUserServiceImpl implements TUserService {
         }
         return new Result<>().error(String.valueOf(voidIMResult.getCode()), voidIMResult.getMsg(), reqDTO.getSessionId());
     }
+
+    @Override
+    public Result<?> destroyUser(DestroyUserReqDTO reqDTO) {
+        LOG.info("destroyUser: {}", reqDTO);
+        IMResult<Void> voidIMResult = null;
+        try {
+            voidIMResult = UserAdmin.destroyUser(reqDTO.getUserId());
+            if (voidIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(voidIMResult.getCode()), voidIMResult.getMsg(), reqDTO.getSessionId());
+    }
 }
