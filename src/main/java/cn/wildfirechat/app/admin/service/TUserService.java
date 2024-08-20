@@ -3,6 +3,8 @@ package cn.wildfirechat.app.admin.service;
 import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.result.Result;
 
+import javax.validation.Valid;
+
 /**
  * t_user service
  */
@@ -71,4 +73,6 @@ public interface TUserService {
      * @return
      */
     Result<?> destroyUser(DestroyUserReqDTO reqDTO);
+
+    Result<?> getBlockList(@Valid BlockUserListReqDTO reqDTO);
 }

@@ -133,4 +133,15 @@ public class UserController {
     public Result<?> destroyUser(@RequestBody DestroyUserReqDTO reqDTO) {
         return tUserService.destroyUser(reqDTO);
     }
+
+    /**
+     * 获取封禁用户列表
+     * @param reqDTO  请求参数
+     * @return 封禁用户列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/getBlockList")
+    public Result<?> getBlockList(@Valid @RequestBody BlockUserListReqDTO reqDTO) {
+        return tUserService.getBlockList(reqDTO);
+    }
 }

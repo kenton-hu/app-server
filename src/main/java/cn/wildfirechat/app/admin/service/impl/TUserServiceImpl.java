@@ -1,6 +1,7 @@
 package cn.wildfirechat.app.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.wildfirechat.app.admin.dto.req.*;
@@ -29,10 +30,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.Id;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TUserServiceImpl implements TUserService {
@@ -249,6 +255,7 @@ public class TUserServiceImpl implements TUserService {
         LOG.info("destroyUser: {}", reqDTO);
         IMResult<Void> voidIMResult = null;
         try {
+            UserAdmin.getBlockedList();
             voidIMResult = UserAdmin.destroyUser(reqDTO.getUserId());
             if (voidIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
@@ -257,5 +264,52 @@ public class TUserServiceImpl implements TUserService {
             throw new RuntimeException(e);
         }
         return new Result<>().error(String.valueOf(voidIMResult.getCode()), voidIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> getBlockList(BlockUserListReqDTO reqDTO) {
+        // 查询封禁用户列表
+        List<TUserStatus> userStatusList = tUserStatusRepository.findByStatus(2);
+        if (CollUtil.isEmpty(userStatusList)) {
+            PageRespDTO<TUser> pageRespDTO = new PageRespDTO<>();
+            pageRespDTO.setPageNo(reqDTO.getPageNo());
+            pageRespDTO.setPageSize(reqDTO.getPageSize());
+            pageRespDTO.setTotalPage(0);
+            pageRespDTO.setTotalCount(0);
+            return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
+        }
+        // 获取封禁用户id
+        List<String> userIdList = userStatusList.stream().map(TUserStatus::getUid).collect(Collectors.toList());
+        // 查询条件存在这个对象中
+        Specification<TUser> specification = (root, query, cb) -> {
+            List<Predicate> predicateList = new ArrayList<>();
+            if (StrUtil.isNotBlank(reqDTO.getSearchKey())) {
+                predicateList.add(cb.like(root.get("name").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                predicateList.add(cb.or(cb.like(root.get("displayName").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
+                predicateList.add(cb.or(cb.like(root.get("mobile").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
+            }
+            if (CollUtil.isNotEmpty(userIdList)) {
+                Expression<String> exp = root.<String>get("uid");
+                predicateList.add(exp.in(userIdList));
+            }
+            Predicate[] p = new Predicate[predicateList.size()];
+            return cb.and(predicateList.toArray(p));
+        };
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        Page<TUser> page = tUserRepository.findAll(specification, pageRequest);
+        PageRespDTO<TUser> pageRespDTO = new PageRespDTO<>();
+        for (TUser tUser : page.getContent()) {
+            TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
+            if (null != tUserStatus) {
+                tUser.setUserStatus(tUserStatus.getStatus());
+            }
+        }
+        pageRespDTO.setItems(page.getContent());
+        pageRespDTO.setPageNo(reqDTO.getPageNo());
+        pageRespDTO.setPageSize(reqDTO.getPageSize());
+        pageRespDTO.setTotalPage(page.getTotalPages());
+        pageRespDTO.setTotalCount(page.getTotalElements());
+        // 查询用户状态
+        return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
     }
 }
