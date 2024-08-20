@@ -1,10 +1,7 @@
 package cn.wildfirechat.app.admin.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
-import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
-import cn.wildfirechat.app.admin.dto.req.GroupUserListReqDTO;
-import cn.wildfirechat.app.admin.dto.req.TransferGroupReqDTO;
+import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TGroupService;
@@ -27,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -117,5 +116,22 @@ public class TGroupServiceImpl implements TGroupService {
             throw new RuntimeException(e);
         }
         return new Result<>().error(String.valueOf(transferIMResult.getCode()), transferIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> changeUserType(ChangeGroupUserTypeReqDTO reqDTO) {
+        LOG.info("changeUserType: {}", reqDTO);
+        IMResult<Void> changeIMResult = new IMResult<>();
+        try {
+            changeIMResult =  GroupAdmin.setGroupManager("admin", reqDTO.getGroupId(),
+                    Collections.singletonList(reqDTO.getMemberId()), 1 == reqDTO.getType(),
+                    null, null);
+            if (changeIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(changeIMResult.getCode()), changeIMResult.getMsg(), reqDTO.getSessionId());
     }
 }

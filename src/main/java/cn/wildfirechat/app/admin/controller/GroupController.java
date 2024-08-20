@@ -65,4 +65,15 @@ public class GroupController {
     public Result<?> transferGroup(@RequestBody TransferGroupReqDTO reqDTO) {
         return tGroupService.transferGroup(reqDTO);
     }
+
+    /**
+     * 设置/取消群管理员
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/changeUserType")
+    public Result<?> changeUserType(@RequestBody ChangeGroupUserTypeReqDTO reqDTO) {
+        return tGroupService.changeUserType(reqDTO);
+    }
 }
