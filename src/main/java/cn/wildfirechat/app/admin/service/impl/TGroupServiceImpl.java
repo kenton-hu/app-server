@@ -170,4 +170,20 @@ public class TGroupServiceImpl implements TGroupService {
         }
         return new Result<>().error(String.valueOf(addUserIMResult.getCode()), addUserIMResult.getMsg(), reqDTO.getSessionId());
     }
+
+    @Override
+    public Result<?> modifyGroupInfo(ModifyGroupReqDTO reqDTO) {
+        LOG.info("modifyGroupInfo: {}", reqDTO);
+        IMResult<Void> modifyGroupIMResult = new IMResult<>();
+        try {
+            modifyGroupIMResult =  GroupAdmin.modifyGroupInfo("admin", reqDTO.getTargetId(), reqDTO.getType(),
+                    String.valueOf(reqDTO.getValue()), null, null);
+            if (modifyGroupIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(modifyGroupIMResult.getCode()), modifyGroupIMResult.getMsg(), reqDTO.getSessionId());
+    }
 }

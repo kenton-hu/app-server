@@ -98,4 +98,15 @@ public class GroupController {
     public Result<?> addUser(@RequestBody GroupUserReqDTO reqDTO) {
         return tGroupService.addUser(reqDTO);
     }
+
+    /**
+     * 修改群组信息
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/modifyGroupInfo")
+    public Result<?> modifyGroupInfo(@RequestBody ModifyGroupReqDTO reqDTO) {
+        return tGroupService.modifyGroupInfo(reqDTO);
+    }
 }

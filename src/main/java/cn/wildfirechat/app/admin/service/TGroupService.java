@@ -56,4 +56,11 @@ public interface TGroupService {
      * @return
      */
     Result<?> addUser(GroupUserReqDTO reqDTO);
+
+    /**
+     * 修改群信息
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> modifyGroupInfo(ModifyGroupReqDTO reqDTO);
 }
