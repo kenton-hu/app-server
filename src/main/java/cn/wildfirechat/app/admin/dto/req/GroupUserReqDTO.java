@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 删除群成员请求DTO
  */
-public class DelGroupUserReqDTO implements Serializable {
+public class GroupUserReqDTO implements Serializable {
 
     @NotBlank(message = "targetId不能为空")
     private String targetId;

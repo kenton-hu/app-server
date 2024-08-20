@@ -12,6 +12,7 @@ import cn.wildfirechat.app.wfchat.jpa.TGroupRepository;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.OutputCreateGroupResult;
 import cn.wildfirechat.pojos.PojoGroupInfo;
+import cn.wildfirechat.pojos.PojoGroupMember;
 import cn.wildfirechat.sdk.GroupAdmin;
 import cn.wildfirechat.sdk.model.IMResult;
 import org.slf4j.Logger;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -136,7 +136,7 @@ public class TGroupServiceImpl implements TGroupService {
     }
 
     @Override
-    public Result<?> delUser(DelGroupUserReqDTO reqDTO) {
+    public Result<?> delUser(GroupUserReqDTO reqDTO) {
         LOG.info("delUser: {}", reqDTO);
         IMResult<Void> delUserIMResult = new IMResult<>();
         try {
@@ -148,5 +148,26 @@ public class TGroupServiceImpl implements TGroupService {
             throw new RuntimeException(e);
         }
         return new Result<>().error(String.valueOf(delUserIMResult.getCode()), delUserIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> addUser(GroupUserReqDTO reqDTO) {
+        LOG.info("addUser: {}", reqDTO);
+        IMResult<Void> addUserIMResult = new IMResult<>();
+        try {
+            List<PojoGroupMember> groupMembers = new ArrayList<>();
+            for (String userId : reqDTO.getUserIds()) {
+                PojoGroupMember groupMember = new PojoGroupMember();
+                groupMember.setMember_id(userId);
+                groupMembers.add(groupMember);
+            }
+            addUserIMResult =  GroupAdmin.addGroupMembers("admin", reqDTO.getTargetId(), groupMembers, null ,null);
+            if (addUserIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(addUserIMResult.getCode()), addUserIMResult.getMsg(), reqDTO.getSessionId());
     }
 }

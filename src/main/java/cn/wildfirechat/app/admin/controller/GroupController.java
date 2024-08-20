@@ -84,7 +84,18 @@ public class GroupController {
      * @return
      */
     @PostMapping(value = "/delUser")
-    public Result<?> delUser(@RequestBody DelGroupUserReqDTO reqDTO) {
+    public Result<?> delUser(@RequestBody GroupUserReqDTO reqDTO) {
         return tGroupService.delUser(reqDTO);
+    }
+
+    /**
+     * 添加群成员
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/addUser")
+    public Result<?> addUser(@RequestBody GroupUserReqDTO reqDTO) {
+        return tGroupService.addUser(reqDTO);
     }
 }
