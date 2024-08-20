@@ -44,4 +44,11 @@ public interface TGroupService {
      * @return
      */
     Result<?> changeUserType(ChangeGroupUserTypeReqDTO reqDTO);
+
+    /**
+     * 删除群成员
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> delUser(DelGroupUserReqDTO reqDTO);
 }

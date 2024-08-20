@@ -134,4 +134,19 @@ public class TGroupServiceImpl implements TGroupService {
         }
         return new Result<>().error(String.valueOf(changeIMResult.getCode()), changeIMResult.getMsg(), reqDTO.getSessionId());
     }
+
+    @Override
+    public Result<?> delUser(DelGroupUserReqDTO reqDTO) {
+        LOG.info("delUser: {}", reqDTO);
+        IMResult<Void> delUserIMResult = new IMResult<>();
+        try {
+            delUserIMResult =  GroupAdmin.kickoffGroupMembers("admin", reqDTO.getTargetId(), reqDTO.getUserIds(), null ,null);
+            if (delUserIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(delUserIMResult.getCode()), delUserIMResult.getMsg(), reqDTO.getSessionId());
+    }
 }

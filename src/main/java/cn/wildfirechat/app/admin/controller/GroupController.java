@@ -76,4 +76,15 @@ public class GroupController {
     public Result<?> changeUserType(@RequestBody ChangeGroupUserTypeReqDTO reqDTO) {
         return tGroupService.changeUserType(reqDTO);
     }
+
+    /**
+     * 删除群成员
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/delUser")
+    public Result<?> delUser(@RequestBody DelGroupUserReqDTO reqDTO) {
+        return tGroupService.delUser(reqDTO);
+    }
 }
