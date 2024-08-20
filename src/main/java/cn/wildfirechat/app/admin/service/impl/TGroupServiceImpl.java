@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupUserListReqDTO;
+import cn.wildfirechat.app.admin.dto.req.TransferGroupReqDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TGroupService;
@@ -101,5 +102,20 @@ public class TGroupServiceImpl implements TGroupService {
         pageRespDTO.setTotalPage(page.getTotalPages());
         pageRespDTO.setTotalCount(page.getTotalElements());
         return new Result<>().success(pageRespDTO, reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> transferGroup(TransferGroupReqDTO reqDTO) {
+        LOG.info("transferGroup: {}", reqDTO);
+        IMResult<Void> transferIMResult = new IMResult<>();
+        try {
+            transferIMResult =  GroupAdmin.transferGroup("admin", reqDTO.getTargetId(), reqDTO.getNewOwnerId(), null, null);
+            if (transferIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(null, reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(transferIMResult.getCode()), transferIMResult.getMsg(), reqDTO.getSessionId());
     }
 }

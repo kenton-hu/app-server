@@ -36,11 +36,11 @@ public class GroupController {
     /**
      * 创建群组
      *
-     * @param reqDTO 用户信息
+     * @param reqDTO 群组信息
      * @return
      */
     @PostMapping(value = "/create")
-    public Result<?> createUser(@RequestBody AddGroupReqDTO reqDTO) {
+    public Result<?> createGroup(@RequestBody AddGroupReqDTO reqDTO) {
         return tGroupService.createGroup(reqDTO);
     }
 
@@ -53,5 +53,16 @@ public class GroupController {
     @PostMapping(value = "/users")
     public Result<?> groupUsers(@Valid @RequestBody GroupUserListReqDTO reqDTO) {
         return tGroupService.groupUsers(reqDTO);
+    }
+
+    /**
+     * 设为群主
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/transferGroup")
+    public Result<?> transferGroup(@RequestBody TransferGroupReqDTO reqDTO) {
+        return tGroupService.transferGroup(reqDTO);
     }
 }

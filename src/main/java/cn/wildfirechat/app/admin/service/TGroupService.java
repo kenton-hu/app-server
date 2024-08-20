@@ -3,6 +3,7 @@ package cn.wildfirechat.app.admin.service;
 import cn.wildfirechat.app.admin.dto.req.AddGroupReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupListReqDTO;
 import cn.wildfirechat.app.admin.dto.req.GroupUserListReqDTO;
+import cn.wildfirechat.app.admin.dto.req.TransferGroupReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 
 import javax.validation.Valid;
@@ -32,4 +33,11 @@ public interface TGroupService {
      * @return 群成员列表
      */
     Result<?> groupUsers(GroupUserListReqDTO reqDTO);
+
+    /**
+     * 设为群主
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> transferGroup(TransferGroupReqDTO reqDTO);
 }
