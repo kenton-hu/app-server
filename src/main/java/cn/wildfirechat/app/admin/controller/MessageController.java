@@ -8,14 +8,12 @@ import org.simpleframework.xml.core.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@RestController("/message")
+@RestController
+@RequestMapping("/message")
 @Validate
 public class MessageController {
     private static final Logger LOG = LoggerFactory.getLogger(MessageController.class);
@@ -31,5 +29,16 @@ public class MessageController {
     @PostMapping(value = "/recall")
     public Result<?> recall(@RequestBody RecallMessageReqDTO reqDTO) {
         return tMessageService.recall(reqDTO);
+    }
+
+    /**
+     * 获取列表
+     * @param reqDTO  请求参数
+     * @return 列表
+     */
+    @CrossOrigin
+    @PostMapping(value = "/list")
+    public Result<?> messageList(@Valid @RequestBody MessageListReqDTO reqDTO) {
+        return tMessageService.messageList(reqDTO);
     }
 }

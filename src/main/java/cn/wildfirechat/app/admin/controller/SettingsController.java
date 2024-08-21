@@ -1,21 +1,19 @@
 package cn.wildfirechat.app.admin.controller;
 
 import cn.wildfirechat.app.admin.dto.req.SettingsInfoReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdateIconReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdatePhoneReqDTO;
-import cn.wildfirechat.app.admin.dto.req.UpdatePwdReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TSettingsService;
-import cn.wildfirechat.app.admin.service.TUserService;
 import org.simpleframework.xml.core.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/settings")
+@RestController
+@RequestMapping("/settings")
 @Validate
 public class SettingsController {
     public static final Logger LOG = LoggerFactory.getLogger(SettingsController.class);

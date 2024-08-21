@@ -15,6 +15,14 @@ public class PageRespDTO<T> implements Serializable {
     private long totalCount;
     private int totalPage;
 
+    public PageRespDTO() {
+    }
+
+    public PageRespDTO(int pageSize, int pageNo) {
+        this.pageSize = pageSize;
+        this.pageNo = pageNo;
+    }
+
     public List<T> getItems() {
         return items;
     }
