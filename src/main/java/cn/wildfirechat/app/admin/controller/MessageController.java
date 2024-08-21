@@ -1,8 +1,9 @@
 package cn.wildfirechat.app.admin.controller;
 
-import cn.wildfirechat.app.admin.dto.req.*;
+import cn.wildfirechat.app.admin.dto.req.MessageListReqDTO;
+import cn.wildfirechat.app.admin.dto.req.RecallMessageReqDTO;
+import cn.wildfirechat.app.admin.dto.req.SendMessageReqDTO;
 import cn.wildfirechat.app.admin.result.Result;
-import cn.wildfirechat.app.admin.service.TGroupService;
 import cn.wildfirechat.app.admin.service.TMessageService;
 import org.simpleframework.xml.core.Validate;
 import org.slf4j.Logger;
@@ -40,5 +41,27 @@ public class MessageController {
     @PostMapping(value = "/list")
     public Result<?> messageList(@Valid @RequestBody MessageListReqDTO reqDTO) {
         return tMessageService.messageList(reqDTO);
+    }
+
+    /**
+     * 群发消息
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/multicast")
+    public Result<?> multicast(@RequestBody SendMessageReqDTO reqDTO) {
+        return tMessageService.multicast(reqDTO);
+    }
+
+    /**
+     * 广播消息
+     *
+     * @param reqDTO 请求参数
+     * @return
+     */
+    @PostMapping(value = "/broadcast")
+    public Result<?> broadcast(@RequestBody SendMessageReqDTO reqDTO) {
+        return tMessageService.multicast(reqDTO);
     }
 }

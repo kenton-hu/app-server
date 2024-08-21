@@ -5,12 +5,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.wildfirechat.app.admin.dto.req.MessageListReqDTO;
 import cn.wildfirechat.app.admin.dto.req.RecallMessageReqDTO;
+import cn.wildfirechat.app.admin.dto.req.SendMessageReqDTO;
 import cn.wildfirechat.app.admin.dto.resp.MessageRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TMessageService;
 import cn.wildfirechat.app.admin.utils.MessageUtils;
 import cn.wildfirechat.common.ErrorCode;
+import cn.wildfirechat.pojos.BroadMessageResult;
+import cn.wildfirechat.pojos.MultiMessageResult;
 import cn.wildfirechat.sdk.MessageAdmin;
 import cn.wildfirechat.sdk.model.IMResult;
 import org.hibernate.query.internal.NativeQueryImpl;
@@ -147,5 +150,35 @@ public class TMessageServiceImpl implements TMessageService {
             totalQuery.setParameter("type", reqDTO.getType());
         }
         return ((BigInteger)totalQuery.getSingleResult()).longValue();
+    }
+
+    @Override
+    public Result<?> multicast(SendMessageReqDTO reqDTO) {
+        LOG.info("multicast: {}", reqDTO);
+        IMResult<MultiMessageResult> multicastIMResult = new IMResult<>();
+        try {
+            multicastIMResult = MessageAdmin.multicastMessage("admin", reqDTO.getUserIds(), 0, null);
+            if (multicastIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(multicastIMResult.getResult(), reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(multicastIMResult.getCode()), multicastIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> broadcast(SendMessageReqDTO reqDTO) {
+        LOG.info("broadcast: {}", reqDTO);
+        IMResult<BroadMessageResult> broadcastIMResult = new IMResult<>();
+        try {
+            broadcastIMResult = MessageAdmin.broadcastMessage("admin", 0, null);
+            if (broadcastIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
+                return new Result<>().success(broadcastIMResult.getResult(), reqDTO.getSessionId());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new Result<>().error(String.valueOf(broadcastIMResult.getCode()), broadcastIMResult.getMsg(), reqDTO.getSessionId());
     }
 }
