@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/message")
+@RequestMapping("/api/v1/message")
 @Validate
 public class MessageController {
     private static final Logger LOG = LoggerFactory.getLogger(MessageController.class);

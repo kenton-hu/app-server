@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/settings")
+@RequestMapping("/api/v1/settings")
 @Validate
 public class SettingsController {
     public static final Logger LOG = LoggerFactory.getLogger(SettingsController.class);

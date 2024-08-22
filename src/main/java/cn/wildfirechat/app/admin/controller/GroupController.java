@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/group")
+@RequestMapping("/api/v1/group")
 @Validate
 public class GroupController {
     private static final Logger LOG = LoggerFactory.getLogger(GroupController.class);
