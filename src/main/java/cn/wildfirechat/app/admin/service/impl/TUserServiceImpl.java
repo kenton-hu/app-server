@@ -161,13 +161,13 @@ public class TUserServiceImpl implements TUserService {
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
         };
-        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo() - 1, reqDTO.getPageSize());
         Page<TUser> page = tUserRepository.findAll(specification, pageRequest);
         PageRespDTO<TUser> pageRespDTO = new PageRespDTO<>();
         for (TUser tUser : page.getContent()) {
             TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
             if (null != tUserStatus) {
-                tUser.setUserStatus(tUserStatus.getStatus());
+                tUser.setUserStatus(String.valueOf(tUserStatus.getStatus()));
             }
         }
         pageRespDTO.setItems(page.getContent());
@@ -324,13 +324,13 @@ public class TUserServiceImpl implements TUserService {
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
         };
-        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo() - 1, reqDTO.getPageSize());
         Page<TUser> page = tUserRepository.findAll(specification, pageRequest);
         PageRespDTO<TUser> pageRespDTO = new PageRespDTO<>();
         for (TUser tUser : page.getContent()) {
             TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
             if (null != tUserStatus) {
-                tUser.setUserStatus(tUserStatus.getStatus());
+                tUser.setUserStatus(String.valueOf(tUserStatus.getStatus()));
             }
         }
         pageRespDTO.setItems(page.getContent());
@@ -389,7 +389,7 @@ public class TUserServiceImpl implements TUserService {
 
     @Override
     public Result<?> sensitiveShot(BasicReqDTO reqDTO) {
-        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo() - 1, reqDTO.getPageSize());
         Page<TSensitiveMessage> page = tSensitiveMessageRepository.findAll(pageRequest);
         PageRespDTO<TSensitiveMessage> pageRespDTO = new PageRespDTO<>();
         pageRespDTO.setItems(page.getContent());

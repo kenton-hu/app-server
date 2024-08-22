@@ -16,7 +16,7 @@ public class TUserStatus {
     private String uid;
 
     @Column(name = "_status")
-    private String status;
+    private int status;
 
     @Column(name = "_dt")
     private long dt;
@@ -37,11 +37,11 @@ public class TUserStatus {
         this.uid = uid;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 

@@ -48,7 +48,7 @@ public class TGroupServiceImpl implements TGroupService {
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
         };
-        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo() - 1, reqDTO.getPageSize());
         Page<TGroup> page = tGroupRepository.findAll(specification, pageRequest);
         PageRespDTO<TGroup> pageRespDTO = new PageRespDTO<>();
         pageRespDTO.setItems(page.getContent());
@@ -92,7 +92,7 @@ public class TGroupServiceImpl implements TGroupService {
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
         };
-        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo(), reqDTO.getPageSize());
+        PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo() - 1, reqDTO.getPageSize());
         Page<TGroupMember> page = tGroupMemberRepository.findAll(specification, pageRequest);
         PageRespDTO<TGroupMember> pageRespDTO = new PageRespDTO<>();
         pageRespDTO.setItems(page.getContent());

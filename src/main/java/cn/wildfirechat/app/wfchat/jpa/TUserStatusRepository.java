@@ -14,7 +14,7 @@ public interface TUserStatusRepository extends CrudRepository<TUserStatus, Integ
      * @param uid 用户id
      * @return 用户状态
      */
-    @Query("select ts.id, ts.uid, ts.status, ts.dt from TUserStatus ts where ts.uid = ?1")
+    @Query("select ts from TUserStatus ts where ts.uid = ?1")
     TUserStatus findByUid(String uid);
 
     /**
@@ -22,6 +22,6 @@ public interface TUserStatusRepository extends CrudRepository<TUserStatus, Integ
      * @param userStatus 用户状态
      * @return 用户状态列表
      */
-    @Query("select ts.id, ts.uid, ts.status, ts.dt from TUserStatus ts where ts.status = ?1")
+    @Query("select ts from TUserStatus ts where ts.status = ?1")
     List<TUserStatus> findByStatus(int userStatus);
 }
