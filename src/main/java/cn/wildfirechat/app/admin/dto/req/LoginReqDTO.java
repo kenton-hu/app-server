@@ -12,7 +12,6 @@ public class LoginReqDTO implements Serializable {
     @NotBlank(message = "密码不能为空")
     private String password;
 
-    @NotBlank(message = "sessionId不能为空")
     private String sessionId;
 
     public String getUserName() {

@@ -11,6 +11,8 @@ import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TMessageService;
 import cn.wildfirechat.app.admin.utils.MessageUtils;
+import cn.wildfirechat.app.admin.utils.UserUtils;
+import cn.wildfirechat.app.wfchat.jpa.TUser;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.BroadMessageResult;
 import cn.wildfirechat.pojos.MultiMessageResult;
@@ -34,13 +36,20 @@ public class TMessageServiceImpl implements TMessageService {
     private static final Logger LOG = LoggerFactory.getLogger(TMessageServiceImpl.class);
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private UserUtils userUtils;
 
     @Override
     public Result<?> recall(RecallMessageReqDTO reqDTO) {
         LOG.info("recall: {}", reqDTO);
+        // 获取用户
+        TUser tUser = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == tUser) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<String> recallIMResult = new IMResult<>();
         try {
-            recallIMResult = MessageAdmin.recallMessage("admin", reqDTO.getMessageId());
+            recallIMResult = MessageAdmin.recallMessage(tUser.getUid(), reqDTO.getMessageId());
             if (recallIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(recallIMResult.getResult(), reqDTO.getSessionId());
             }
@@ -155,9 +164,14 @@ public class TMessageServiceImpl implements TMessageService {
     @Override
     public Result<?> multicast(SendMessageReqDTO reqDTO) {
         LOG.info("multicast: {}", reqDTO);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<MultiMessageResult> multicastIMResult = new IMResult<>();
         try {
-            multicastIMResult = MessageAdmin.multicastMessage("admin", reqDTO.getUserIds(), 0, null);
+            multicastIMResult = MessageAdmin.multicastMessage(user.getUid(), reqDTO.getUserIds(), 0, null);
             if (multicastIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(multicastIMResult.getResult(), reqDTO.getSessionId());
             }
@@ -170,9 +184,14 @@ public class TMessageServiceImpl implements TMessageService {
     @Override
     public Result<?> broadcast(SendMessageReqDTO reqDTO) {
         LOG.info("broadcast: {}", reqDTO);
+        // 获取用户
+        TUser tUser = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == tUser) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<BroadMessageResult> broadcastIMResult = new IMResult<>();
         try {
-            broadcastIMResult = MessageAdmin.broadcastMessage("admin", 0, null);
+            broadcastIMResult = MessageAdmin.broadcastMessage(tUser.getUid(), 0, null);
             if (broadcastIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(broadcastIMResult.getResult(), reqDTO.getSessionId());
             }

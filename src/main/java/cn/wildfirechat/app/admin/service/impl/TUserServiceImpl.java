@@ -2,8 +2,10 @@ package cn.wildfirechat.app.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.json.JSONUtil;
 import cn.wildfirechat.app.admin.dto.req.*;
 import cn.wildfirechat.app.admin.dto.resp.IndexRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
@@ -12,6 +14,8 @@ import cn.wildfirechat.app.admin.dto.resp.UserRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.IndexService;
 import cn.wildfirechat.app.admin.service.TUserService;
+import cn.wildfirechat.app.admin.utils.RedisUtil;
+import cn.wildfirechat.app.admin.utils.UserUtils;
 import cn.wildfirechat.app.wfchat.jpa.*;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.*;
@@ -24,7 +28,6 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -49,11 +52,20 @@ public class TUserServiceImpl implements TUserService {
     private TSensitiveMessageRepository tSensitiveMessageRepository;
     @Autowired
     private IndexService indexService;
+    @Autowired
+    private RedisUtil redisUtil;
+    @Autowired
+    private UserUtils userUtils;
 
     @Override
     public Result<?> updatePwd(UpdatePwdReqDTO reqDTO) {
         LOG.info("reqDTO: {}", reqDTO);
-        Optional<TUser> optional = tUserRepository.findById(2);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
+        Optional<TUser> optional = tUserRepository.findById(user.getId());
         if (!optional.isPresent()) {
             // 用户不存在，返回错误信息
             return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
@@ -75,7 +87,12 @@ public class TUserServiceImpl implements TUserService {
     @Override
     public Result<?> updateIcon(UpdateIconReqDTO reqDTO) {
         LOG.info("reqDTO: {}", reqDTO);
-        Optional<TUser> optional = tUserRepository.findById(2);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
+        Optional<TUser> optional = tUserRepository.findById(user.getId());
         if (!optional.isPresent()) {
             // 用户不存在，返回错误信息
             return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
@@ -90,7 +107,12 @@ public class TUserServiceImpl implements TUserService {
     @Override
     public Result<?> updatePhone(UpdatePhoneReqDTO reqDTO) {
         LOG.info("reqDTO: {}", reqDTO);
-        Optional<TUser> optional = tUserRepository.findById(2);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
+        Optional<TUser> optional = tUserRepository.findById(user.getId());
         if (!optional.isPresent()) {
             // 用户不存在，返回错误信息
             return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
@@ -105,7 +127,12 @@ public class TUserServiceImpl implements TUserService {
     @Override
     public Result<?> getUserInfo(UserInfoReqDTO reqDTO) {
         LOG.info("reqDTO: {}", reqDTO);
-        Optional<TUser> optional = tUserRepository.findById(2);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
+        Optional<TUser> optional = tUserRepository.findById(user.getId());
         if (!optional.isPresent()) {
             // 用户不存在，返回错误信息
             return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
@@ -153,8 +180,11 @@ public class TUserServiceImpl implements TUserService {
 
     @Override
     public Result<?> sendMessage(UserSendMsgReqDTO reqDTO) {
-        Subject subject = SecurityUtils.getSubject();
-        String userId = (String) subject.getSession().getAttribute("userId");
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
 
         Conversation conversation = new Conversation();
         conversation.setTarget(reqDTO.getTo());
@@ -163,7 +193,7 @@ public class TUserServiceImpl implements TUserService {
         payload.setContent(reqDTO.getContent());
         IMResult<SendMessageResult> imResult = null;
         try {
-            imResult = MessageAdmin.sendMessage(userId, conversation, payload);
+            imResult = MessageAdmin.sendMessage(user.getUid(), conversation, payload);
             if (imResult != null && imResult.getCode() == ErrorCode.ERROR_CODE_SUCCESS.code) {
                 return new Result<>().success(imResult.getResult(), reqDTO.getSessionId());
             }
@@ -176,28 +206,28 @@ public class TUserServiceImpl implements TUserService {
     @Override
     public Result<?> login(LoginReqDTO reqDTO) {
         // 根据userName查询
-        TUser exampleUser = new TUser();
-        exampleUser.setName(reqDTO.getUserName());
-        Example<TUser> tUserExample = Example.of(exampleUser);
-        Optional<TUser> optional = tUserRepository.findOne(tUserExample);
-        if (!optional.isPresent()) {
+        TUser tUser = tUserRepository.findByName(reqDTO.getUserName());
+        if (null == tUser) {
             return new Result<>().error("user:not:exist", "用户不存在", reqDTO.getSessionId());
         }
         String password = DigestUtil.md5Hex(reqDTO.getPassword());
-        TUser tUser = optional.get();
         LOG.info("tuser: {}", tUser);
         // 验证密码是否正确
-        if (!password.equals(exampleUser.getPasswordMD5())) {
+        if (!password.equals(tUser.getPasswordMD5())) {
             // 密码不正确，返回错误信息
             return new Result<>().error("user:pwd:error", "密码错误", reqDTO.getSessionId());
         }
         UserInfoRespDTO userInfoRespDTO = new UserInfoRespDTO();
         BeanUtil.copyProperties(tUser, userInfoRespDTO);
-        userInfoRespDTO.setSessionId(reqDTO.getSessionId());
+        // 生成sessionId
+        String sessionId = IdUtil.simpleUUID();
+        userInfoRespDTO.setSessionId(sessionId);
         // 查询用户状态
         TUserStatus tUserStatus = tUserStatusRepository.findByUid(tUser.getUid());
         userInfoRespDTO.setUserStatus(tUserStatus);
-        return new Result<>().success(tUser, reqDTO.getSessionId());
+        // 将用户信息存入redis
+        redisUtil.set(sessionId, JSONUtil.toJsonStr(tUser), 24 * 60 * 60);
+        return new Result<>().success(tUser, userInfoRespDTO.getSessionId());
     }
 
     @Override
