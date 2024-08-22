@@ -117,4 +117,11 @@ public interface TUserService {
      * @return
      */
     Result<?> alls(@Valid BasicReqDTO reqDTO);
+
+    /**
+     * 获取首页数据
+     * @param reqDTO 请求参数
+     * @return
+     */
+    Result<?> getIndexInfo(IndexInfoReqDTO reqDTO);
 }

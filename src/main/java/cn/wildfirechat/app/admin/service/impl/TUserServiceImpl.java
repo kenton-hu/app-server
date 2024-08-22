@@ -5,10 +5,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.wildfirechat.app.admin.dto.req.*;
+import cn.wildfirechat.app.admin.dto.resp.IndexRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserInfoRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.UserRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
+import cn.wildfirechat.app.admin.service.IndexService;
 import cn.wildfirechat.app.admin.service.TUserService;
 import cn.wildfirechat.app.wfchat.jpa.*;
 import cn.wildfirechat.common.ErrorCode;
@@ -45,6 +47,8 @@ public class TUserServiceImpl implements TUserService {
     private TUserStatusRepository tUserStatusRepository;
     @Autowired
     private TSensitiveMessageRepository tSensitiveMessageRepository;
+    @Autowired
+    private IndexService indexService;
 
     @Override
     public Result<?> updatePwd(UpdatePwdReqDTO reqDTO) {
@@ -386,5 +390,29 @@ public class TUserServiceImpl implements TUserService {
             throw new RuntimeException(e);
         }
         return new Result<>().error(String.valueOf(allUsersIMResult.getCode()), allUsersIMResult.getMsg(), reqDTO.getSessionId());
+    }
+
+    @Override
+    public Result<?> getIndexInfo(IndexInfoReqDTO reqDTO) {
+        IndexRespDTO respDTO = new IndexRespDTO();
+        // 每日新增用户数
+        respDTO.setNewUser(indexService.dailyNewUserCount(reqDTO));
+        // 每日活跃用户数
+        respDTO.setActiveUser(indexService.dailyActiveUserCount(reqDTO));
+        // 累计用户数
+        respDTO.setTotalUser(indexService.totalUser(reqDTO));
+        // 每日消息发送数
+        respDTO.setTotalMsg(indexService.dailySendMsgCount(reqDTO));
+        // 每日创建群数
+        respDTO.setNewGroup(indexService.dailyCreateGroup(reqDTO));
+        // 累计创建群数
+        respDTO.setTotalGroup(indexService.totalCreateGroup(reqDTO));
+        // 最新100张图片轮播
+        respDTO.setTop100Image(indexService.top100Image(reqDTO));
+        // Top10活跃用户数
+        respDTO.setTop10NewMesFrom(indexService.top10ActiveUser(reqDTO));
+        // Top10活跃群组数
+        respDTO.setTop10Group(indexService.top10ActiveGroup(reqDTO));
+        return new Result<>().success(respDTO, reqDTO.getSessionId());
     }
 }

@@ -63,4 +63,9 @@ public class AdminController {
     public Result<?> updatePhone(@RequestBody UpdatePhoneReqDTO reqDTO) {
         return tUserService.updatePhone(reqDTO);
     }
+
+    @PostMapping("/getIndexInfo")
+    public Result<?> getIndexInfo(@RequestBody IndexInfoReqDTO reqDTO) {
+        return tUserService.getIndexInfo(reqDTO);
+    }
 }
