@@ -139,10 +139,10 @@ public class V1UserController {
         return tUserService.delSensitiveShot(reqDTO);
     }
 
-    /**
-     * 获取敏感词列表
+   /**
+     * 获取所有用户
      * @param reqDTO  请求参数
-     * @return 敏感词列表
+     * @return 用户列表
      */
     @CrossOrigin
     @PostMapping(value = "/alls")
