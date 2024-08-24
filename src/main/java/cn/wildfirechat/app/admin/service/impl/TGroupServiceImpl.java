@@ -1,14 +1,14 @@
 package cn.wildfirechat.app.admin.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.wildfirechat.app.admin.dto.req.*;
+import cn.wildfirechat.app.admin.dto.resp.GroupUserRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TGroupService;
-import cn.wildfirechat.app.wfchat.jpa.TGroup;
-import cn.wildfirechat.app.wfchat.jpa.TGroupMember;
-import cn.wildfirechat.app.wfchat.jpa.TGroupMemberRepository;
-import cn.wildfirechat.app.wfchat.jpa.TGroupRepository;
+import cn.wildfirechat.app.wfchat.jpa.*;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.OutputCreateGroupResult;
 import cn.wildfirechat.pojos.PojoGroupInfo;
@@ -27,6 +27,8 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TGroupServiceImpl implements TGroupService {
@@ -35,6 +37,8 @@ public class TGroupServiceImpl implements TGroupService {
     private TGroupRepository tGroupRepository;
     @Autowired
     private TGroupMemberRepository tGroupMemberRepository;
+    @Autowired
+    private TUserRepository tUserRepository;
 
     @Override
     public Result<?> getGroupList(GroupListReqDTO reqDTO) {
@@ -94,8 +98,29 @@ public class TGroupServiceImpl implements TGroupService {
         };
         PageRequest pageRequest = PageRequest.of(reqDTO.getPageNo() - 1, reqDTO.getPageSize());
         Page<TGroupMember> page = tGroupMemberRepository.findAll(specification, pageRequest);
-        PageRespDTO<TGroupMember> pageRespDTO = new PageRespDTO<>();
-        pageRespDTO.setItems(page.getContent());
+        PageRespDTO<GroupUserRespDTO> pageRespDTO = new PageRespDTO<>();
+        List<TGroupMember> content = page.getContent();
+        if (CollUtil.isNotEmpty(content)) {
+            List<String> midList = content.stream().map(TGroupMember::getMemberId).collect(Collectors.toList());
+            List<TUser> userList = tUserRepository.findByUids(midList);
+            Map<String, TUser> userMap = userList.stream().collect(Collectors.toMap(TUser::getUid, user -> user));
+
+            List<GroupUserRespDTO> resultList = new ArrayList<>();
+            for (TGroupMember groupMember : content) {
+                GroupUserRespDTO groupUserRespDTO = new GroupUserRespDTO();
+                BeanUtil.copyProperties(groupMember, groupUserRespDTO);
+                if (userMap.containsKey(groupMember.getMemberId())) {
+                    TUser user = userMap.get(groupMember.getMemberId());
+                    groupUserRespDTO.setMemberId(user.getUid());
+                    groupUserRespDTO.setAlias(user.getDisplayName());
+                    groupUserRespDTO.setPortrait(user.getPortrait());
+                    groupUserRespDTO.setName(user.getName());
+                    groupUserRespDTO.setDisplayName(user.getDisplayName());
+                }
+                resultList.add(groupUserRespDTO);
+            }
+            pageRespDTO.setItems(resultList);
+        }
         pageRespDTO.setPageNo(reqDTO.getPageNo());
         pageRespDTO.setPageSize(reqDTO.getPageSize());
         pageRespDTO.setTotalPage(page.getTotalPages());
