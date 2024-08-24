@@ -11,19 +11,21 @@ public class MessageRespDTO implements Serializable {
     private String fromName;
 
     private int type;
+    private String typeString;
     private String target;
     private String targetName;
     private int line;
     private String data;
     private String searchableKey;
-    private Date dt;
+    private long dt;
     private int contentType;
+    private String contentTypeString;
     private String to;
 
     public MessageRespDTO() {
     }
 
-    public MessageRespDTO(int id, long mid, String from, int type, String target, int line, String data, String searchableKey, Date dt, int contentType, String to, String fromName, String targetName) {
+    public MessageRespDTO(int id, long mid, String from, int type, String target, int line, String data, String searchableKey, long dt, int contentType, String to, String fromName, String targetName) {
         this.id = id;
         this.mid = mid;
         this.from = from;
@@ -103,11 +105,11 @@ public class MessageRespDTO implements Serializable {
         this.searchableKey = searchableKey;
     }
 
-    public Date getDt() {
+    public long getDt() {
         return dt;
     }
 
-    public void setDt(Date dt) {
+    public void setDt(long dt) {
         this.dt = dt;
     }
 
@@ -141,5 +143,21 @@ public class MessageRespDTO implements Serializable {
 
     public void setTargetName(String targetName) {
         this.targetName = targetName;
+    }
+
+    public String getTypeString() {
+        return typeString;
+    }
+
+    public void setTypeString(String typeString) {
+        this.typeString = typeString;
+    }
+
+    public String getContentTypeString() {
+        return contentTypeString;
+    }
+
+    public void setContentTypeString(String contentTypeString) {
+        this.contentTypeString = contentTypeString;
     }
 }

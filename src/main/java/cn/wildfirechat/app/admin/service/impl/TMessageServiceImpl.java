@@ -3,6 +3,8 @@ package cn.wildfirechat.app.admin.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.wildfirechat.app.admin.enums.ContentTypeEnum;
+import cn.wildfirechat.app.admin.enums.SessionTypeEnum;
 import cn.wildfirechat.app.admin.dto.req.MessageListReqDTO;
 import cn.wildfirechat.app.admin.dto.req.RecallMessageReqDTO;
 import cn.wildfirechat.app.admin.dto.req.SendMessageReqDTO;
@@ -121,6 +123,10 @@ public class TMessageServiceImpl implements TMessageService {
         List resultList = nativeQuery.getResultList();
         if (CollUtil.isNotEmpty(resultList)) {
             result = BeanUtil.copyToList(resultList, MessageRespDTO.class);
+            for (MessageRespDTO messageRespDTO : result) {
+                messageRespDTO.setTypeString(SessionTypeEnum.getCodeName(String.valueOf(messageRespDTO.getType())));
+                messageRespDTO.setContentTypeString(ContentTypeEnum.getCodeName(String.valueOf(messageRespDTO.getContentType())));
+            }
         }
         return result;
 

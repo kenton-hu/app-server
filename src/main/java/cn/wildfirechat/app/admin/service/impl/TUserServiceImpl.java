@@ -154,9 +154,14 @@ public class TUserServiceImpl implements TUserService {
         Specification<TUser> specification = (root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
             if (StrUtil.isNotBlank(reqDTO.getSearchKey())) {
-                predicateList.add(cb.like(root.get("name").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
-                predicateList.add(cb.or(cb.like(root.get("displayName").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
-                predicateList.add(cb.or(cb.like(root.get("mobile").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
+                List<Predicate> tempOr = new ArrayList<>(); //临时查询条件or
+                tempOr.add(cb.like(root.get("name").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                tempOr.add(cb.like(root.get("displayName").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                tempOr.add(cb.like(root.get("mobile").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+
+                Predicate[] arrayOr = new Predicate[tempOr.size()];
+                predicateList.add(cb.or(tempOr.toArray(arrayOr)));
+
             }
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
@@ -313,9 +318,13 @@ public class TUserServiceImpl implements TUserService {
         Specification<TUser> specification = (root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
             if (StrUtil.isNotBlank(reqDTO.getSearchKey())) {
-                predicateList.add(cb.like(root.get("name").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
-                predicateList.add(cb.or(cb.like(root.get("displayName").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
-                predicateList.add(cb.or(cb.like(root.get("mobile").as(String.class), "%" + reqDTO.getSearchKey() + "%")));
+                List<Predicate> tempOr = new ArrayList<>(); //临时查询条件or
+                tempOr.add(cb.like(root.get("name").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                tempOr.add(cb.like(root.get("displayName").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                tempOr.add(cb.like(root.get("mobile").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+
+                Predicate[] arrayOr = new Predicate[tempOr.size()];
+                predicateList.add(cb.or(tempOr.toArray(arrayOr)));
             }
             if (CollUtil.isNotEmpty(userIdList)) {
                 Expression<String> exp = root.<String>get("uid");

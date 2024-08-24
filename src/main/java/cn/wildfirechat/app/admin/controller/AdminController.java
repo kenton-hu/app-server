@@ -27,7 +27,7 @@ public class AdminController {
      * @return
      */
     @PostMapping("/login")
-    public Result<?> login(LoginReqDTO reqDTO) {
+    public Result<?> login(@RequestBody LoginReqDTO reqDTO) {
         return tUserService.login(reqDTO);
     }
 
