@@ -62,6 +62,6 @@ public class MessageController {
      */
     @PostMapping(value = "/broadcast")
     public Result<?> broadcast(@RequestBody SendMessageReqDTO reqDTO) {
-        return tMessageService.multicast(reqDTO);
+        return tMessageService.broadcast(reqDTO);
     }
 }

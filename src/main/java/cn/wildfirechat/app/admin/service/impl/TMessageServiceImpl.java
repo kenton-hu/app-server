@@ -17,6 +17,7 @@ import cn.wildfirechat.app.admin.utils.UserUtils;
 import cn.wildfirechat.app.wfchat.jpa.TUser;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.BroadMessageResult;
+import cn.wildfirechat.pojos.MessagePayload;
 import cn.wildfirechat.pojos.MultiMessageResult;
 import cn.wildfirechat.sdk.MessageAdmin;
 import cn.wildfirechat.sdk.model.IMResult;
@@ -177,7 +178,11 @@ public class TMessageServiceImpl implements TMessageService {
         }
         IMResult<MultiMessageResult> multicastIMResult = new IMResult<>();
         try {
-            multicastIMResult = MessageAdmin.multicastMessage(user.getUid(), reqDTO.getUserIds(), 0, null);
+            MessagePayload messagePayload = new MessagePayload();
+            messagePayload.setSearchableContent(reqDTO.getContent());
+            messagePayload.setContent(reqDTO.getContent());
+            messagePayload.setType(1);
+            multicastIMResult = MessageAdmin.multicastMessage(user.getUid(), reqDTO.getUserIds(), 0, messagePayload);
             if (multicastIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(multicastIMResult.getResult(), reqDTO.getSessionId());
             }
@@ -197,7 +202,12 @@ public class TMessageServiceImpl implements TMessageService {
         }
         IMResult<BroadMessageResult> broadcastIMResult = new IMResult<>();
         try {
-            broadcastIMResult = MessageAdmin.broadcastMessage(tUser.getUid(), 0, null);
+            MessagePayload messagePayload = new MessagePayload();
+            messagePayload.setSearchableContent(reqDTO.getContent());
+            messagePayload.setContent(reqDTO.getContent());
+            messagePayload.setType(1);
+            LOG.info("messagePayload: {}", messagePayload);
+            broadcastIMResult = MessageAdmin.broadcastMessage(tUser.getUid(), 0, messagePayload);
             if (broadcastIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(broadcastIMResult.getResult(), reqDTO.getSessionId());
             }

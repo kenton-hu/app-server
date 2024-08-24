@@ -8,6 +8,7 @@ import cn.wildfirechat.app.admin.dto.resp.GroupUserRespDTO;
 import cn.wildfirechat.app.admin.dto.resp.PageRespDTO;
 import cn.wildfirechat.app.admin.result.Result;
 import cn.wildfirechat.app.admin.service.TGroupService;
+import cn.wildfirechat.app.admin.utils.UserUtils;
 import cn.wildfirechat.app.wfchat.jpa.*;
 import cn.wildfirechat.common.ErrorCode;
 import cn.wildfirechat.pojos.OutputCreateGroupResult;
@@ -39,6 +40,8 @@ public class TGroupServiceImpl implements TGroupService {
     private TGroupMemberRepository tGroupMemberRepository;
     @Autowired
     private TUserRepository tUserRepository;
+    @Autowired
+    private UserUtils userUtils;
 
     @Override
     public Result<?> getGroupList(GroupListReqDTO reqDTO) {
@@ -71,9 +74,16 @@ public class TGroupServiceImpl implements TGroupService {
         groupInfo.setOwner(reqDTO.getOwner());
         groupInfo.setPortrait(reqDTO.getPortrait());
         groupInfo.setType(Integer.parseInt(reqDTO.getType()));
+
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
+
         IMResult<OutputCreateGroupResult> groupImResult = new IMResult<>();
         try {
-            groupImResult = GroupAdmin.createGroup("admin", groupInfo, null, null, null);
+            groupImResult = GroupAdmin.createGroup(user.getUid(), groupInfo, null, null, null);
             if (groupImResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 // 返回data
                 return new Result<>().success(groupImResult.getResult(), reqDTO.getSessionId());
@@ -91,7 +101,10 @@ public class TGroupServiceImpl implements TGroupService {
         Specification<TGroupMember> specification = (root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
             if (StrUtil.isNotBlank(reqDTO.getSearchKey())) {
-                predicateList.add(cb.like(root.get("mid").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+                predicateList.add(cb.like(root.get("memberId").as(String.class), "%" + reqDTO.getSearchKey() + "%"));
+            }
+            if (StrUtil.isNotBlank(reqDTO.getGroupId())) {
+                predicateList.add(cb.equal(root.get("gid").as(String.class), reqDTO.getGroupId()));
             }
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
@@ -111,6 +124,7 @@ public class TGroupServiceImpl implements TGroupService {
                 BeanUtil.copyProperties(groupMember, groupUserRespDTO);
                 if (userMap.containsKey(groupMember.getMemberId())) {
                     TUser user = userMap.get(groupMember.getMemberId());
+                    groupUserRespDTO.setUid(user.getUid());
                     groupUserRespDTO.setMemberId(user.getUid());
                     groupUserRespDTO.setAlias(user.getDisplayName());
                     groupUserRespDTO.setPortrait(user.getPortrait());
@@ -131,9 +145,15 @@ public class TGroupServiceImpl implements TGroupService {
     @Override
     public Result<?> transferGroup(TransferGroupReqDTO reqDTO) {
         LOG.info("transferGroup: {}", reqDTO);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
+
         IMResult<Void> transferIMResult = new IMResult<>();
         try {
-            transferIMResult =  GroupAdmin.transferGroup("admin", reqDTO.getTargetId(), reqDTO.getNewOwnerId(), null, null);
+            transferIMResult =  GroupAdmin.transferGroup(user.getUid(), reqDTO.getTargetId(), reqDTO.getNewOwnerId(), null, null);
             if (transferIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
             }
@@ -146,9 +166,14 @@ public class TGroupServiceImpl implements TGroupService {
     @Override
     public Result<?> changeUserType(ChangeGroupUserTypeReqDTO reqDTO) {
         LOG.info("changeUserType: {}", reqDTO);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<Void> changeIMResult = new IMResult<>();
         try {
-            changeIMResult =  GroupAdmin.setGroupManager("admin", reqDTO.getGroupId(),
+            changeIMResult =  GroupAdmin.setGroupManager(user.getUid(), reqDTO.getGroupId(),
                     Collections.singletonList(reqDTO.getMemberId()), 1 == reqDTO.getType(),
                     null, null);
             if (changeIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
@@ -163,9 +188,14 @@ public class TGroupServiceImpl implements TGroupService {
     @Override
     public Result<?> delUser(GroupUserReqDTO reqDTO) {
         LOG.info("delUser: {}", reqDTO);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<Void> delUserIMResult = new IMResult<>();
         try {
-            delUserIMResult =  GroupAdmin.kickoffGroupMembers("admin", reqDTO.getTargetId(), reqDTO.getUserIds(), null ,null);
+            delUserIMResult =  GroupAdmin.kickoffGroupMembers(user.getUid(), reqDTO.getTargetId(), reqDTO.getUserIds(), null ,null);
             if (delUserIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
             }
@@ -186,7 +216,12 @@ public class TGroupServiceImpl implements TGroupService {
                 groupMember.setMember_id(userId);
                 groupMembers.add(groupMember);
             }
-            addUserIMResult =  GroupAdmin.addGroupMembers("admin", reqDTO.getTargetId(), groupMembers, null ,null);
+            // 获取用户
+            TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+            if (null == user) {
+                return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+            }
+            addUserIMResult =  GroupAdmin.addGroupMembers(user.getUid(), reqDTO.getTargetId(), groupMembers, null ,null);
             if (addUserIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
             }
@@ -199,9 +234,14 @@ public class TGroupServiceImpl implements TGroupService {
     @Override
     public Result<?> modifyGroupInfo(ModifyGroupReqDTO reqDTO) {
         LOG.info("modifyGroupInfo: {}", reqDTO);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<Void> modifyGroupIMResult = new IMResult<>();
         try {
-            modifyGroupIMResult =  GroupAdmin.modifyGroupInfo("admin", reqDTO.getTargetId(), reqDTO.getType(),
+            modifyGroupIMResult =  GroupAdmin.modifyGroupInfo(user.getUid(), reqDTO.getTargetId(), reqDTO.getType(),
                     String.valueOf(reqDTO.getValue()), null, null);
             if (modifyGroupIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
@@ -215,9 +255,14 @@ public class TGroupServiceImpl implements TGroupService {
     @Override
     public Result<?> dismissGroup(DismissGroupReqDTO reqDTO) {
         LOG.info("dismissGroup: {}", reqDTO);
+        // 获取用户
+        TUser user = userUtils.getUserBySessionId(reqDTO.getSessionId());
+        if (null == user) {
+            return new Result<>().error("session:invalid", "sessionId失效", reqDTO.getSessionId());
+        }
         IMResult<Void> dismissGroupIMResult = new IMResult<>();
         try {
-            dismissGroupIMResult =  GroupAdmin.dismissGroup("admin", reqDTO.getTargetId(),null, null);
+            dismissGroupIMResult =  GroupAdmin.dismissGroup(user.getUid(), reqDTO.getTargetId(),null, null);
             if (dismissGroupIMResult.getErrorCode() == ErrorCode.ERROR_CODE_SUCCESS) {
                 return new Result<>().success(null, reqDTO.getSessionId());
             }

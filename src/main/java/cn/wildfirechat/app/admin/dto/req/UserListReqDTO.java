@@ -11,6 +11,8 @@ public class UserListReqDTO {
 
     private String searchKey;
 
+    private String groupId;
+
     private int pageNo = 1;
 
     private int pageSize = 10;
@@ -45,5 +47,13 @@ public class UserListReqDTO {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

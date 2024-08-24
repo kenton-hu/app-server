@@ -1,10 +1,13 @@
 package cn.wildfirechat.app.admin.dto.resp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.util.Date;
 
 public class MessageRespDTO implements Serializable {
     private int id;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private long mid;
 
     private String from;

@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -56,6 +57,8 @@ public class TUserServiceImpl implements TUserService {
     private RedisUtil redisUtil;
     @Autowired
     private UserUtils userUtils;
+    @Autowired
+    private TGroupMemberRepository tGroupMemberRepository;
 
     @Override
     public Result<?> updatePwd(UpdatePwdReqDTO reqDTO) {
@@ -161,7 +164,24 @@ public class TUserServiceImpl implements TUserService {
 
                 Predicate[] arrayOr = new Predicate[tempOr.size()];
                 predicateList.add(cb.or(tempOr.toArray(arrayOr)));
-
+            }
+            // 如果groupId不为空，则需要过滤掉组成员
+            if (StrUtil.isNotBlank(reqDTO.getGroupId())) {
+                // 查询群组所有成员
+                List<TGroupMember> memberList = tGroupMemberRepository.findByGid(reqDTO.getGroupId());
+                if (CollUtil.isNotEmpty(memberList)) {
+                    List<String> userIdList = memberList.stream().map(TGroupMember::getMemberId).collect(Collectors.toList());
+                    if (CollUtil.isNotEmpty(userIdList)) {
+                        Expression<String> exp = root.<String>get("uid");
+                        // 指定in需要的字段
+                        CriteriaBuilder.In<String> in = cb.in(root.get("uid"));
+                        // 设置值
+                        for (String userId: userIdList ) {
+                            in.value(userId);
+                        }
+                        predicateList.add(in.not());
+                    }
+                }
             }
             Predicate[] p = new Predicate[predicateList.size()];
             return cb.and(predicateList.toArray(p));
