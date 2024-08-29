@@ -24,6 +24,8 @@ import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class IndexServiceImpl implements IndexService {
@@ -35,46 +37,76 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public List<IndexInfoRespDTO> dailyNewUserCount(IndexInfoReqDTO reqDTO) {
-        List<IndexInfoRespDTO> result = new ArrayList<>();
         String startDate = getStartDate(reqDTO);
         String endDate = getEndDate(reqDTO);
+        List<IndexInfoRespDTO> result = initDateRangeList(endDate);
         // 组装sql
-        String sql = "WITH RECURSIVE date_series AS (  \n" +
-                "  SELECT '" + startDate + "' AS `date`  \n" +
-                "  UNION ALL  \n" +
-                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
-                "  FROM date_series  \n" +
-                "  WHERE date < '" + endDate + "'  \n" +
-                ")  \n" +
-                "select ds.date, count(tu.id) as `count` from date_series ds left join wfchat.t_user tu on DATE_FORMAT(tu._createTime,'%Y-%m-%d') = ds.date group by ds.date order by ds.date";
+//        String sql = "WITH RECURSIVE date_series AS (  \n" +
+//                "  SELECT '" + startDate + "' AS `date`  \n" +
+//                "  UNION ALL  \n" +
+//                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
+//                "  FROM date_series  \n" +
+//                "  WHERE date < '" + endDate + "'  \n" +
+//                ")  \n" +
+//                "select ds.date, count(tu.id) as `count` from date_series ds left join wfchat.t_user tu on DATE_FORMAT(tu._createTime,'%Y-%m-%d') = ds.date group by ds.date order by ds.date";
+        String sql = "select DATE_FORMAT(tu._createTime,'%Y-%m-%d') as `date`, count(tu.id) as `count` from wfchat.t_user tu where DATE_FORMAT(tu._createTime,'%Y-%m-%d') between '" + startDate + "' and '" + endDate + "' group by `date`";
         Query query = entityManager.createNativeQuery(sql);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         List resultList = query.getResultList();
         if (CollUtil.isNotEmpty(resultList)) {
-            result = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            List<IndexInfoRespDTO> list = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            Map<String, String> map = list.stream().collect(Collectors.toMap(IndexInfoRespDTO::getDate, IndexInfoRespDTO::getCount));
+            for (IndexInfoRespDTO respDTO : result) {
+                if (map.containsKey(respDTO.getDate())) {
+                    respDTO.setCount(map.get(respDTO.getDate()));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 初始化日期范围列表
+     * @return
+     */
+    private List<IndexInfoRespDTO> initDateRangeList(String endDate) {
+        List<IndexInfoRespDTO> result = new ArrayList<>();
+        // 日期数据
+        Map<String, Long> rangeDate = DateUtils.getRangeDate(endDate, 6, DatePattern.NORM_DATE_PATTERN);
+        if (CollUtil.isNotEmpty(rangeDate)) {
+            for (Map.Entry<String, Long> entry : rangeDate.entrySet()) {
+                result.add(new IndexInfoRespDTO(String.valueOf(entry.getValue()), entry.getKey()));
+            }
         }
         return result;
     }
 
     @Override
     public List<IndexInfoRespDTO> dailyActiveUserCount(IndexInfoReqDTO reqDTO) {
-        List<IndexInfoRespDTO> result = new ArrayList<>();
         String startDate = getStartDate(reqDTO);
         String endDate = getEndDate(reqDTO);
+        List<IndexInfoRespDTO> result = initDateRangeList(endDate);
         // 组装sql
-        String sql = "WITH RECURSIVE date_series AS (  \n" +
-                "  SELECT '" + startDate + "' AS `date`  \n" +
-                "  UNION ALL  \n" +
-                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
-                "  FROM date_series  \n" +
-                "  WHERE date < '" + endDate + "'  \n" +
-                ")  \n" +
-                "select ds.date, count(tus.id) as `count` from date_series ds left join wfchat.t_user_session tus on from_unixtime(_dt / 1000, '%Y-%m-%d') = ds.date group by ds.date order by ds.date";
+//        String sql = "WITH RECURSIVE date_series AS (  \n" +
+//                "  SELECT '" + startDate + "' AS `date`  \n" +
+//                "  UNION ALL  \n" +
+//                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
+//                "  FROM date_series  \n" +
+//                "  WHERE date < '" + endDate + "'  \n" +
+//                ")  \n" +
+//                "select ds.date, count(tus.id) as `count` from date_series ds left join wfchat.t_user_session tus on from_unixtime(_dt / 1000, '%Y-%m-%d') = ds.date group by ds.date order by ds.date";
+        String sql = "select from_unixtime(_dt / 1000, '%Y-%m-%d') as `date`, count(tus.id) as `count` from wfchat.t_user_session tus WHERE from_unixtime(_dt / 1000, '%Y-%m-%d') between '" + startDate + "' and '" + endDate+ "' group by `date` order by `date`";
         Query query = entityManager.createNativeQuery(sql);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         List resultList = query.getResultList();
         if (CollUtil.isNotEmpty(resultList)) {
-            result = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            List<IndexInfoRespDTO> list = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            Map<String, String> map = list.stream().collect(Collectors.toMap(IndexInfoRespDTO::getDate, IndexInfoRespDTO::getCount));
+            for (IndexInfoRespDTO respDTO : result) {
+                if (map.containsKey(respDTO.getDate())) {
+                    respDTO.setCount(map.get(respDTO.getDate()));
+                }
+            }
         }
         return result;
     }
@@ -111,47 +143,61 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public List<IndexInfoRespDTO> dailySendMsgCount(IndexInfoReqDTO reqDTO) {
-        List<IndexInfoRespDTO> result = new ArrayList<>();
         String startDate = getStartDate(reqDTO);
         String endDate = getEndDate(reqDTO);
+        List<IndexInfoRespDTO> result = initDateRangeList(endDate);
         String monthNo = DateUtils.getDateByFormat(reqDTO.getDate(), DatePattern.SIMPLE_MONTH_PATTERN);
         // 组装sql
-        String sql = "WITH RECURSIVE date_series AS (  \n" +
-                "  SELECT '" + startDate + "' AS `date`  \n" +
-                "  UNION ALL  \n" +
-                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
-                "  FROM date_series  \n" +
-                "  WHERE date < '" + endDate + "'  \n" +
-                ")  \n" +
-                "select ds.date, count(tm.id) as `count` from date_series ds left join wfchat." + MessageUtils.genTableName("t_messages", monthNo) + " tm on DATE_FORMAT(tm._dt,'%Y-%m-%d') = ds.date group by ds.date order by ds.date";
+//        String sql = "WITH RECURSIVE date_series AS (  \n" +
+//                "  SELECT '" + startDate + "' AS `date`  \n" +
+//                "  UNION ALL  \n" +
+//                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
+//                "  FROM date_series  \n" +
+//                "  WHERE date < '" + endDate + "'  \n" +
+//                ")  \n" +
+//                "select ds.date, count(tm.id) as `count` from date_series ds left join wfchat." + MessageUtils.genTableName("t_messages", monthNo) + " tm on DATE_FORMAT(tm._dt,'%Y-%m-%d') = ds.date group by ds.date order by ds.date";
+        String sql = "select DATE_FORMAT(tm._dt,'%Y-%m-%d') as `date`, count(tm.id) as `count` from wfchat." + MessageUtils.genTableName("t_messages", monthNo) + " tm WHERE DATE_FORMAT(tm._dt,'%Y-%m-%d') between '" + startDate + "' and '" + endDate + "' group by `date` order by `date`";
         Query query = entityManager.createNativeQuery(sql);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         List resultList = query.getResultList();
         if (CollUtil.isNotEmpty(resultList)) {
-            result = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            List<IndexInfoRespDTO> list = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            Map<String, String> map = list.stream().collect(Collectors.toMap(IndexInfoRespDTO::getDate, IndexInfoRespDTO::getCount));
+            for (IndexInfoRespDTO respDTO : result) {
+                if (map.containsKey(respDTO.getDate())) {
+                    respDTO.setCount(map.get(respDTO.getDate()));
+                }
+            }
         }
         return result;
     }
 
     @Override
     public  List<IndexInfoRespDTO> dailyCreateGroup(IndexInfoReqDTO reqDTO) {
-        List<IndexInfoRespDTO> result = new ArrayList<>();
         String startDate = getStartDate(reqDTO);
         String endDate = getEndDate(reqDTO);
+        List<IndexInfoRespDTO> result = initDateRangeList(endDate);
         // 组装sql
-        String sql = "WITH RECURSIVE date_series AS (  \n" +
-                "  SELECT '" + startDate + "' AS `date`  \n" +
-                "  UNION ALL  \n" +
-                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
-                "  FROM date_series  \n" +
-                "  WHERE date < '" + endDate + "'  \n" +
-                ")  \n" +
-                "select ds.date, count(tg.id) as `count` from date_series ds left join wfchat.t_group tg on DATE_FORMAT(tg._dt,'%Y-%m-%d') = ds.date group by ds.date";
+//        String sql = "WITH RECURSIVE date_series AS (  \n" +
+//                "  SELECT '" + startDate + "' AS `date`  \n" +
+//                "  UNION ALL  \n" +
+//                "  SELECT DATE_ADD(date, INTERVAL 1 DAY)  \n" +
+//                "  FROM date_series  \n" +
+//                "  WHERE date < '" + endDate + "'  \n" +
+//                ")  \n" +
+//                "select ds.date, count(tg.id) as `count` from date_series ds left join wfchat.t_group tg on DATE_FORMAT(tg._dt,'%Y-%m-%d') = ds.date group by ds.date";
+        String sql = "select DATE_FORMAT(tg._dt,'%Y-%m-%d') as `date`, count(tg.id) as `count` from wfchat.t_group tg WHERE DATE_FORMAT(tg._dt,'%Y-%m-%d') between '" + startDate + "' and '" + endDate + "' group by `date` order by `date`";
         Query query = entityManager.createNativeQuery(sql);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         List resultList = query.getResultList();
         if (CollUtil.isNotEmpty(resultList)) {;
-            result = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            List<IndexInfoRespDTO> list = BeanUtil.copyToList(resultList, IndexInfoRespDTO.class);
+            Map<String, String> map = list.stream().collect(Collectors.toMap(IndexInfoRespDTO::getDate, IndexInfoRespDTO::getCount));
+            for (IndexInfoRespDTO respDTO : result) {
+                if (map.containsKey(respDTO.getDate())) {
+                    respDTO.setCount(map.get(respDTO.getDate()));
+                }
+            }
         }
         return result;
     }
