@@ -187,7 +187,7 @@ public class IndexServiceImpl implements IndexService {
 //                "  WHERE date < '" + endDate + "'  \n" +
 //                ")  \n" +
 //                "select ds.date, count(tg.id) as `count` from date_series ds left join wfchat.t_group tg on DATE_FORMAT(tg._dt,'%Y-%m-%d') = ds.date group by ds.date";
-        String sql = "select DATE_FORMAT(tg._dt,'%Y-%m-%d') as `date`, count(tg.id) as `count` from wfchat.t_group tg WHERE DATE_FORMAT(tg._dt,'%Y-%m-%d') between '" + startDate + "' and '" + endDate + "' group by `date` order by `date`";
+        String sql = "select DATE_FORMAT(tg._createTime,'%Y-%m-%d') as `date`, count(tg.id) as `count` from wfchat.t_group tg WHERE DATE_FORMAT(tg._createTime,'%Y-%m-%d') between '" + startDate + "' and '" + endDate + "' group by `date` order by `date`";
         Query query = entityManager.createNativeQuery(sql);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         List resultList = query.getResultList();
