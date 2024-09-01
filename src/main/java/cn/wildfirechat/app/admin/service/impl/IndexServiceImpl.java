@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +33,7 @@ public class IndexServiceImpl implements IndexService {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexServiceImpl.class);
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     @Override
